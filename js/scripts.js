@@ -59,17 +59,21 @@ function calculateBMI(pokemon) {
   return ((pokemon.weight / cmHeight / cmHeight) * 10000).toFixed(1);
 }
 
-document.write('Currently added pokemon to the pokedex: ')
-for(let i = 0; i < pokemonList.length; i++) {
-  let bmi = calculateBMI(pokemonList[i]);
-  document.write('<br>' + pokemonList[i].name + ' - BMI ' + bmi);
-  if(bmi >= 25.0) {
-    document.write(' (<b>If this pokemon were human, they would be considered overweight!</b>) ');
+let firstLoad = function(list) {
+  document.write('Currently added pokemon to the pokedex: ')
+  for(let i = 0; i < pokemonList.length; i++) {
+    let bmi = calculateBMI(pokemonList[i]);
+    document.write('<br>' + pokemonList[i].name + ' - BMI ' + bmi);
+    if(bmi >= 25.0) {
+      document.write(' (<b>If this pokemon were human, they would be considered overweight!</b>) ');
+    }
+    else if(bmi <= 18.5) {
+      document.write(' (<b>If this pokemon were human, they would be considered underweight!</b>) ')
+    }
+    if(i !== pokemonList.length - 1) {
+      document.write(', ');
+    }
   }
-  else if(bmi <= 18.5) {
-    document.write(' (<b>If this pokemon were human, they would be considered underweight!</b>) ')
-  }
-  if(i !== pokemonList.length - 1) {
-    document.write(', ');
-  }
-}
+};
+
+firstLoad();
