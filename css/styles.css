@@ -1,3 +1,7 @@
+:root {
+  --button-color-primary: #7ae869;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,13 +16,41 @@ body {
   /* Sets the line height to 1.6 */
 }
 
+button {
+  border: none;
+  display: inline-block;
+  float: none;
+  font-family: inherit;
+  background-color: var(--button-color-primary);
+  width: 135px;
+  padding: 5px;
+  border-radius: 2px;
+  margin: 3px;
+  text-decoration: none;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  transition: 0.2s opacity;
+}
+
+button:hover, button:focus {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
 .pokedex {
   background-color: black;
-  opacity: 85%;
+  opacity: 95%;
   align: center;
 }
 
 .pokedex__text {
   color: white;
   text-align: center;
+}
+
+.pokedex__list {
+  list-style-type: none;
+}
+
+.pokedex__list li {
+  display: block;
 }

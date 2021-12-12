@@ -74,27 +74,48 @@ let pokemonRepository = (function() {
     return pokemonList.filter(pokemon => name.toLowerCase() === pokemon.name.toLowerCase()); // Make sure it's not case-sensitive
   }
 
+  function calculateBMI(pokemon) {
+    let cmHeight = pokemon.height * 100;
+    return ((pokemon.weight / cmHeight / cmHeight) * 10000).toFixed(1);
+  }
+
+  function showDetails(pokemon) {
+    console.log(pokemon);
+  }
+
+  function addListItem(pokemon) {
+    //let bmi = calculateBMI(pokemon);
+    let list = document.querySelector('ul');
+    let li = document.createElement('li');
+    let btn = document.createElement('button');
+
+    btn.innerText = pokemon.name;
+    btn.classList.add('pokedex__list');
+    btn.addEventListener('click', () => { // Call your function through the event function, NOT directly!
+      showDetails(pokemon);
+    });
+    li.appendChild(btn);
+
+    /*li.innerHTML += ' - BMI ' + bmi;
+    if(bmi >= 25.0) {
+      li.innerHTML += ' (<i>If this pokemon were human, they would be considered</i> <b>overweight!</b>) ';
+    }
+    else if(bmi <= 18.5) {
+      li.innerHTML += ' (<i>If this pokemon were human, they would be considered</i> <b>underweight!</b>) ';
+    }*/
+    list.appendChild(li);
+  }
+
   return {
     add: add,
     getAll: getAll,
-    getPokemon: getPokemon
+    getPokemon: getPokemon,
+    addListItem: addListItem
   };
 })(); // This calls the function immediately, instead of having to call it later.
-
-function calculateBMI(pokemon) {
-  let cmHeight = pokemon.height * 100;
-  return ((pokemon.weight / cmHeight / cmHeight) * 10000).toFixed(1);
-}
 
 document.write('Currently added pokemon to the pokedex: ')
 
 pokemonRepository.getAll().forEach( pokemon => {
-  let bmi = calculateBMI(pokemon);
-  document.write('<br>' + pokemon.name + ' - BMI ' + bmi);
-  if(bmi >= 25.0) {
-    document.write(' (<i>If this pokemon were human, they would be considered</i> <b>overweight!</b>) ');
-  }
-  else if(bmi <= 18.5) {
-    document.write(' (<i>If this pokemon were human, they would be considered</i> <b>underweight!</b>) ')
-  }
+  pokemonRepository.addListItem(pokemon);
 } );
