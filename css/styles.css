@@ -28,7 +28,7 @@ button {
   margin: 3px;
   text-decoration: none;
   border-bottom: 2px solid rgba(0, 0, 0, 0.3);
-  transition: 0.2s opacity;
+  transition: 0.1s opacity;
 }
 
 button:hover, button:focus {
@@ -39,7 +39,8 @@ button:hover, button:focus {
 .pokedex {
   background-color: black;
   opacity: 95%;
-  align: center;
+  border-radius: 2px;
+  border: 2px solid var(--button-color-primary);
 }
 
 .pokedex__text {
@@ -47,8 +48,13 @@ button:hover, button:focus {
   text-align: center;
 }
 
+.pokedex__box {
+  text-align: center;
+}
+
 .pokedex__list {
   list-style-type: none;
+  margin-left: -40px;
 }
 
 .pokedex__list li {
