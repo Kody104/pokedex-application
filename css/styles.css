@@ -23,7 +23,9 @@ button {
   float: none;
   font-family: inherit;
   background-color: var(--color-primary);
-  width: 135px;
+  width: 75%;
+  min-width: 70px;
+  max-width: 135px;
   padding: 5px;
   border-radius: 2px;
   margin: 3px;
