@@ -14,6 +14,7 @@ let pokemonRepository = (function() {
   function populateList() {
     let pokedexBox = document.querySelector('.pokedex__box');
 
+    // Load the list of pokemon from the api
     loadList(targetUrl).then(function(multi) {
       multi.forEach( pokemon => {
         addListItem(pokemon);

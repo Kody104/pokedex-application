@@ -177,6 +177,7 @@ button:hover, button:focus {
   margin-bottom: 10px;
   height: auto;
   width: 50%;
+  min-width: 100px;
 }
 
 .pokedex__text {
