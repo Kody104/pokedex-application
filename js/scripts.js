@@ -19,27 +19,27 @@ let pokemonRepository = (function() {
       multi.forEach( pokemon => {
         addListItem(pokemon);
         pokeCount++;
-
-        // Remove old button if it exists
-        let oldBtn = document.querySelector('.formatted');
-        if(oldBtn) {
-          oldBtn.parentNode.removeChild(oldBtn);
-        }
-
-        // Create next button if there is something to create it for
-        if(nextUrl !== null) {
-          let nextBtn = document.createElement('button');
-          nextBtn.classList.add('formatted');
-          nextBtn.innerText = 'Next';
-
-          nextBtn.addEventListener('click', () => {
-            targetUrl = nextUrl;
-            populateList();
-          });
-
-          pokedexBox.appendChild(nextBtn);
-        }
       });
+
+      // Remove old button if it exists
+      let oldBtn = document.querySelector('.formatted');
+      if(oldBtn) {
+        oldBtn.parentNode.removeChild(oldBtn);
+      }
+
+      // Create next button if there is something to create it for
+      if(nextUrl !== null) {
+        let nextBtn = document.createElement('button');
+        nextBtn.classList.add('formatted');
+        nextBtn.innerText = 'Next';
+
+        nextBtn.addEventListener('click', () => {
+          targetUrl = nextUrl;
+          populateList();
+        });
+
+        pokedexBox.appendChild(nextBtn);
+      }
     });
   }
 
@@ -209,6 +209,13 @@ let pokemonRepository = (function() {
     pokeImage.src = pokemon.imageUrl;
     pokeImage.classList.add('pokeimg');
 
+    let rightbox = document.createElement('div');
+    rightbox.classList.add('pokebox');
+    rightbox.classList.add('pokebox__right');
+
+    let contentTitle = document.createElement('h1');
+    contentTitle.innerText = 'Info';
+
     let pokeContent = document.createElement('p');
     pokeContent.innerText = 'Height: ' + (pokemon.height / 10).toFixed(1) + 'm\nWeight: ' + (pokemon.weight / 10).toFixed(1)
     + 'kg\nBMI: ' + calculateBMI(pokemon) + '\nDescription: ' + pokemon.description;
@@ -219,8 +226,10 @@ let pokemonRepository = (function() {
     types.forEach(typeElement => {
       leftbox.appendChild(typeElement);
     });
+    rightbox.appendChild(contentTitle);
+    rightbox.appendChild(pokeContent);
     pokebox.appendChild(leftbox);
-    pokebox.appendChild(pokeContent);
+    pokebox.appendChild(rightbox);
     pokeContainer.appendChild(pokebox);
 
     pokeContainer.classList.add('is-visible');
@@ -233,7 +242,7 @@ let pokemonRepository = (function() {
       if(e.key === 'Escape') {
         hidePokebox();
       }
-      if(lastId !== null) {
+      else if(lastId !== null) {
         if(e.key === 'ArrowRight' && lastId < pokeCount - 1) {
           lastId += 1;
           showDetails(pokemonList[lastId]);
