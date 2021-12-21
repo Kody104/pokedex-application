@@ -1,6 +1,7 @@
 :root {
   --color-primary: #7ae869;
-  --color-secondary: #69b8e8;
+  --color-secondary: #e8e869;
+  --color-triary: #69b8e8;
 }
 
 * {
@@ -80,6 +81,7 @@ button:hover, button:focus {
   min-height: 380px;
   width: 50%;
   border: 1px solid var(--color-primary);
+  overflow: hidden;
 }
 
 .pokebox__right {
@@ -88,6 +90,7 @@ button:hover, button:focus {
   min-height: 380px;
   width: 50%;
   border: 1px solid var(--color-primary);
+  overflow: hidden;
 }
 
 .pokebox h1 {
@@ -197,6 +200,11 @@ button:hover, button:focus {
   min-width: 100px;
 }
 
+.search_button {
+  color: black;
+  background-color: var(--color-secondary);
+}
+
 .pokedex__text {
   font-size: 24px;
   font-weight: 500;
@@ -230,6 +238,27 @@ button:hover, button:focus {
   display: block;
 }
 
+.menubox {
+  display: none;
+  border: 1px solid var(--color-secondary);
+  color: white;
+  width: 90%;
+  padding: 5px;
+  margin: 5px;
+}
+
+.menubox__visible {
+  display: inline-block;
+}
+
+.menu__list {
+  list-style-type: none;
+}
+
+.menu__list li {
+  display: inline-block;
+}
+
 @supports(display: grid) {
   .pokedex__list {
     display:grid;
@@ -237,10 +266,21 @@ button:hover, button:focus {
     grid-gap: 2px;
     width: auto;
   }
+
+  .menu__list {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 2px;
+    margin-right: 40px;
+  }
 }
 
 @media all and (max-width: 500px) {
   .pokedex__list {
+    grid-template-columns: 1fr;
+  }
+
+  .menu__list {
     grid-template-columns: 1fr;
   }
 }
@@ -249,16 +289,28 @@ button:hover, button:focus {
   .pokedex__list {
     grid-template-columns: 1fr 1fr;
   }
+
+  .menu__list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media all and (min-width: 750px) and (max-width: 1000px) {
   .pokedex__list {
     grid-template-columns: 1fr 1fr 1fr;
   }
+
+  .menu__list {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 @media all and (min-width: 1000px) and (max-width: 1250px) {
   .pokedex__list {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  .menu__list {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 }

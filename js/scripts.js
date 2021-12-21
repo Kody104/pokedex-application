@@ -1,5 +1,8 @@
 let pokemonRepository = (function() {
   let pokemonList = [];
+  let pokeTypes = ['normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost',
+                   'steel', 'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark',
+                   'fairy'];
   let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
   let nextUrl = null;
   let pokeCount = 0;
@@ -11,6 +14,29 @@ let pokemonRepository = (function() {
     return word.charAt(0).toUpperCase() + word.slice(1);
   }
 
+  /* Creates the inital document elements */
+  function createDocument() {
+    let pokedexBox = document.querySelector('.pokedex__box');
+
+    let searchBtn = document.querySelector('.search_button');
+
+    if(!searchBtn) {
+      searchBtn = document.createElement('button');
+      searchBtn.classList.add('search_button');
+      searchBtn.innerText = 'Search';
+
+      searchBtn.addEventListener('click', () => {
+          showSearchBox();
+      });
+
+      pokedexBox.appendChild(searchBtn);
+    }
+
+    populateList();
+  }
+
+  /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
+      out of pokemon to add.*/
   function populateList() {
     let pokedexBox = document.querySelector('.pokedex__box');
 
@@ -20,6 +46,8 @@ let pokemonRepository = (function() {
         addListItem(pokemon);
         pokeCount++;
       });
+
+      createSearchBox();
 
       // Remove old button if it exists
       let oldBtn = document.querySelector('.formatted');
@@ -43,6 +71,7 @@ let pokemonRepository = (function() {
     });
   }
 
+  /* Adds a pokemon to the list of pokemon tracked by the application. */
   function add(pokemon) {
     if(typeof pokemon !== 'object') { // Safety check so that only objects can pass
       console.warn('You can only add objects to the respository.');
@@ -56,12 +85,14 @@ let pokemonRepository = (function() {
     return pokemonList;
   }
 
+  /* Calculates the bmi of a pokemon based on it's given weight and height properties. */
   function calculateBMI(pokemon) {
     let cmHeight = pokemon.height * 10;
     let kmWeight = pokemon.weight / 10;
     return ((kmWeight / cmHeight / cmHeight) * 10000).toFixed(1);
   }
 
+  /* Loads the details of a pokemon, then loads it's description, then creates the pokebox modal. */
   function showDetails(pokemon) {
     // Wait for the details to load, then print them to console.
     loadDetails(pokemon).then(function () {
@@ -71,12 +102,154 @@ let pokemonRepository = (function() {
     });
   }
 
+  /* Creates the search box if it doesn't exist and removes the
+     visible property if it does already exists. */
+  function createSearchBox() {
+    let target = document.querySelector('.pokedex__list');
+
+    if(!target) {
+      console.error('Couldn\t find the pokedex list.');
+      return;
+    }
+
+    let box = document.querySelector('.menubox');
+    if(box) {
+      box.classList.remove('menubox__visible');
+
+      let searchBtn = document.querySelector('.search_button');
+
+      if(!searchBtn) {
+        searchBtn = document.createElement('button');
+        searchBtn.classList.add('search_button');
+        searchBtn.innerText = 'Search';
+
+        searchBtn.addEventListener('click', () => {
+            showSearchBox();
+        });
+
+        target.parentNode.insertBefore(searchBtn, target);
+      }
+      return;
+    }
+
+    box = document.createElement('div');
+    box.classList.add('menubox');
+
+    let titleText = document.createElement('h3');
+    titleText.style = 'display: inline;';
+    titleText.innerText = 'Type';
+
+    let list = document.createElement('ul');
+    list.classList.add('menu__list');
+
+    let items = [];
+
+    for(let i = 0; i < pokeTypes.length; i++) {
+      let checkbox = document.createElement('input');
+      checkbox.type = 'radio';
+      checkbox.name = 'type';
+      checkbox.value = pokeTypes[i];
+      checkbox.addEventListener('change', () => {
+        handleTypeCheckbox(checkbox);
+      });
+      let label = document.createElement('label');
+      label.for = 'menu item';
+      label.innerText = ' ' + capitalizeWord(pokeTypes[i]);
+      label.addEventListener('click', () => {
+        checkbox.checked = true;
+        handleTypeCheckbox(checkbox);
+      });
+      let li = document.createElement('li');
+      li.appendChild(checkbox);
+      li.appendChild(label);
+      items.push(li);
+    }
+
+    items.forEach( item => {
+      list.appendChild(item);
+    });
+
+    box.appendChild(titleText);
+    box.appendChild(list);
+    target.parentNode.insertBefore(box, target);
+  }
+
+  /* Handles the list when a type has been checked by the user. */
+  function handleTypeCheckbox(checkbox) {
+    clearListItems();
+    let count = 0;
+    pokemonList.forEach( pokemon => {
+      loadDetails(pokemon).then(function() {
+        if(pokemon.types) {
+          pokemon.types.forEach( type => {
+            if(type.type.name === checkbox.value) {
+              addListItem(pokemon);
+              count++;
+            }
+          });
+        }
+      })
+    });
+  }
+
+  /* Sets the searchbox to visible. */
+  function showSearchBox() {
+    let searchbox = document.querySelector('.menubox');
+
+    if(searchbox) {
+      searchbox.classList.add('menubox__visible');
+
+      let searchBtn = document.querySelector('.search_button');
+      searchBtn.parentNode.removeChild(searchBtn);
+    }
+  }
+
+  /* Removes the pokedex list of pokemon and replaces the next button with a reset button */
+  function clearListItems() {
+    let pokedexBox = document.querySelector('.pokedex__box');
+
+    let list = document.querySelector('.pokedex__list');
+    if(list) {
+      list.parentNode.removeChild(list);
+    }
+    let oldBtn = document.querySelector('.formatted');
+    if(oldBtn) {
+      oldBtn.parentNode.removeChild(oldBtn);
+    }
+    let resetBtn = document.createElement('button');
+    resetBtn.classList.add('formatted');
+    resetBtn.innerText = 'Reset';
+
+    resetBtn.addEventListener('click', () => {
+      pokeCount = 0;
+      pokemonList = [];
+      targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
+      nextUrl = null;
+      lastId = null;
+      clearListItems();
+      createDocument();
+    });
+
+    pokedexBox.appendChild(resetBtn);
+  }
+
+  /* Adds a pokemon's information to pokedex__box and creates a list for them
+    if it doesn't already exist.*/
   function addListItem(pokemon) {
     if(!add(pokemon)) {
       return;
     }
 
-    let list = document.querySelector('ul');
+    let pokedexBox = document.querySelector('.pokedex__box');
+
+    let list = document.querySelector('.pokedex__list');
+
+    if(!list) {
+      list = document.createElement('ul');
+      list.classList.add('pokedex__list');
+      pokedexBox.appendChild(list);
+    }
+
     let li = document.createElement('li');
     let btn = document.createElement('button');
 
@@ -90,6 +263,7 @@ let pokemonRepository = (function() {
     list.appendChild(li);
   }
 
+  /* Loads the api's json and creates the pokemon objects from it. */
   function loadList(url) {
     showLoadingMessage(null);
     // Wait for the list to return
@@ -115,6 +289,7 @@ let pokemonRepository = (function() {
     })
   }
 
+  /* Gets the proporties of the pokemon by it's detailsUrl. */
   function loadDetails(item) {
     showLoadingMessage(item);
     let url = item.detailsUrl;
@@ -139,6 +314,8 @@ let pokemonRepository = (function() {
     });
   }
 
+  /* Gets the description object of a pokemon and returns the first one
+    that's in english.*/
   function loadDescription(item) {
     showLoadingMessage(item);
     let url = item.speciesUrl;
@@ -160,6 +337,7 @@ let pokemonRepository = (function() {
     });
   }
 
+  /* Lets the user know what's loading after they do an action. */
   function showLoadingMessage(resource) {
     let fillText = document.querySelector('.pokedex__text');
     if(resource === null) {
@@ -170,16 +348,19 @@ let pokemonRepository = (function() {
     }
   }
 
+  /* Resets the loading text to display 'Pokedex'. */
   function hideLoadingMessage() {
     let fillText = document.querySelector('.pokedex__text');
     fillText.innerText = 'Pokedex';
   }
 
+  /* Hides the pokebox from display */
   function hidePokebox() {
     pokeContainer.classList.remove('is-visible');
     lastId = null;
   }
 
+  /* Creates the pokebox and displays the selected pokemon inside of it. */
   function showPokebox(pokemon) {
     lastId = pokemon.id - 1;
 
@@ -218,7 +399,7 @@ let pokemonRepository = (function() {
 
     let pokeContent = document.createElement('p');
     pokeContent.innerText = 'Height: ' + (pokemon.height / 10).toFixed(1) + 'm\nWeight: ' + (pokemon.weight / 10).toFixed(1)
-    + 'kg\nBMI: ' + calculateBMI(pokemon) + '\nDescription: ' + pokemon.description;
+    + 'kg\nBMI: ' + calculateBMI(pokemon) + '\n\nDescription: ' + pokemon.description;
 
     leftbox.appendChild(pokeTitle);
     leftbox.appendChild(pokeImage);
@@ -270,8 +451,8 @@ let pokemonRepository = (function() {
     loadList: loadList,
     loadDetails: loadDetails,
     targetUrl: targetUrl,
-    populateList: populateList
+    createDocument: createDocument
   };
 })(); // This calls the function immediately, instead of having to call it later.
 
-pokemonRepository.populateList();
+pokemonRepository.createDocument();
