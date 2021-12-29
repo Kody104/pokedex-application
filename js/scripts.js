@@ -7,7 +7,7 @@ let pokemonRepository = (function() {
   let nextUrl = null;
   let pokeCount = 0;
 
-  let pokeContainer = document.querySelector('#pokemon-container');
+  let pokeContainer = $('#pokemon-container');
   let lastId = null;
 
   function capitalizeWord(word) {
@@ -16,20 +16,20 @@ let pokemonRepository = (function() {
 
   /* Creates the inital document elements */
   function createDocument() {
-    let pokedexBox = document.querySelector('.pokedex__box');
+    let pokedexBox = $('.pokedex__box');
 
-    let searchBtn = document.querySelector('.search_button');
+    let searchBtn = $('.search_button');
 
-    if(!searchBtn) {
-      searchBtn = document.createElement('button');
-      searchBtn.classList.add('search_button');
-      searchBtn.innerText = 'Search';
+    if(!(searchBtn.get(0))) {
+      searchBtn = $('<button>');
+      searchBtn.addClass('search_button');
+      searchBtn.text('Search');
 
-      searchBtn.addEventListener('click', () => {
+      searchBtn.on('click', () => {
           showSearchBox();
       });
 
-      pokedexBox.appendChild(searchBtn);
+      pokedexBox.append(searchBtn);
     }
 
     populateList();
@@ -38,7 +38,7 @@ let pokemonRepository = (function() {
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
       out of pokemon to add.*/
   function populateList() {
-    let pokedexBox = document.querySelector('.pokedex__box');
+    let pokedexBox = $('.pokedex__box');
 
     // Load the list of pokemon from the api
     loadList(targetUrl).then(function(multi) {
@@ -50,23 +50,23 @@ let pokemonRepository = (function() {
       createSearchBox();
 
       // Remove old button if it exists
-      let oldBtn = document.querySelector('.formatted');
-      if(oldBtn) {
-        oldBtn.parentNode.removeChild(oldBtn);
+      let oldBtn = $('.formatted');
+      if(oldBtn.get(0)) {
+        oldBtn.remove();
       }
 
       // Create next button if there is something to create it for
       if(nextUrl !== null) {
-        let nextBtn = document.createElement('button');
-        nextBtn.classList.add('formatted');
-        nextBtn.innerText = 'Next';
+        let nextBtn = $('<button>');
+        nextBtn.addClass('formatted');
+        nextBtn.text('Next');
 
-        nextBtn.addEventListener('click', () => {
+        nextBtn.on('click', () => {
           targetUrl = nextUrl;
           populateList();
         });
 
-        pokedexBox.appendChild(nextBtn);
+        pokedexBox.append(nextBtn);
       }
     });
   }
@@ -105,122 +105,136 @@ let pokemonRepository = (function() {
   /* Creates the search box if it doesn't exist and removes the
      visible property if it does already exists. */
   function createSearchBox() {
-    let target = document.querySelector('.pokedex__list');
+    let target = $('.pokedex__list');
 
     if(!target) {
-      console.error('Couldn\t find the pokedex list.');
+      console.error('Couldn\'t find the pokedex list.');
       return;
     }
 
-    let box = document.querySelector('.menubox');
-    if(box) {
-      box.classList.remove('menubox__visible');
+    let box = $('.menubox');
+    if(box.get(0)) {
+      box.removeClass('menubox__visible');
 
-      let searchBtn = document.querySelector('.search_button');
+      let searchBtn = $('.search_button');
 
-      if(!searchBtn) {
-        searchBtn = document.createElement('button');
-        searchBtn.classList.add('search_button');
-        searchBtn.innerText = 'Search';
+      if(!(searchBtn.get(0))) {
+        searchBtn = $('<button>');
+        searchBtn.addClass('search_button');
+        searchBtn.text('Search');
 
-        searchBtn.addEventListener('click', () => {
+        searchBtn.on('click', () => {
             showSearchBox();
         });
 
-        target.parentNode.insertBefore(searchBtn, target);
+        searchBtn.insertBefore(target);
       }
       return;
     }
 
-    box = document.createElement('div');
-    box.classList.add('menubox');
+    box = $('<div>');
+    box.addClass('menubox');
 
-    let titleText = document.createElement('h3');
-    titleText.style = 'display: inline;';
-    titleText.innerText = 'Type';
+    let titleText = $('<h3>');
+    titleText.css('display', 'inline');
+    titleText.text('Type ');
 
-    let list = document.createElement('ul');
-    list.classList.add('menu__list');
+    let list =$('<ul>');
+    list.addClass('menu__list');
 
     let items = [];
 
     for(let i = 0; i < pokeTypes.length; i++) {
-      let checkbox = document.createElement('input');
-      checkbox.type = 'radio';
-      checkbox.name = 'type';
-      checkbox.value = pokeTypes[i];
-      checkbox.addEventListener('change', () => {
+      let checkbox = $('<input>');
+      checkbox.prop({
+        type: 'radio',
+        id: 'pokeType',
+        name: 'type',
+        value: pokeTypes[i]
+      });
+      checkbox.on('change', () => {
         handleTypeCheckbox(checkbox);
       });
-      let label = document.createElement('label');
-      label.for = 'menu item';
-      label.innerText = ' ' + capitalizeWord(pokeTypes[i]);
-      label.addEventListener('click', () => {
-        checkbox.checked = true;
+      let label = $('<label>');
+      label.prop({for: 'menu item'});
+      label.text(' ' + capitalizeWord(pokeTypes[i]));
+      label.on('click', () => {
+        checkbox.prop('checked', true);
         handleTypeCheckbox(checkbox);
       });
-      let li = document.createElement('li');
-      li.appendChild(checkbox);
-      li.appendChild(label);
+      let li = $('<li>');
+      li.append(checkbox);
+      li.append(label);
       items.push(li);
     }
 
     items.forEach( item => {
-      list.appendChild(item);
+      list.append(item);
     });
 
-    box.appendChild(titleText);
-    box.appendChild(list);
-    target.parentNode.insertBefore(box, target);
+    box.append(titleText);
+    box.append(list);
+    box.insertBefore(target);
   }
 
   /* Handles the list when a type has been checked by the user. */
   function handleTypeCheckbox(checkbox) {
     clearListItems();
-    let count = 0;
+    comparePokemonToType(checkbox);
+  }
+
+  function comparePokemonToType(checkbox) {
+    let promiseArray = [];
     pokemonList.forEach( pokemon => {
-      loadDetails(pokemon).then(function() {
-        if(pokemon.types) {
-          pokemon.types.forEach( type => {
-            if(type.type.name === checkbox.value) {
-              addListItem(pokemon);
-              count++;
-            }
-          });
-        }
-      })
+      let promise = new Promise(function(resolve, reject) {
+        loadDetails(pokemon).then(function() {
+          showLoadingMessage(pokemon, 'Indexing');
+          resolve(pokemon);
+        });
+      });
+      promiseArray.push(promise);
+    });
+    Promise.all(promiseArray).then(function(items) {
+      items.forEach(item => {
+        item.types.forEach( type => {
+          if(type.type.name == checkbox.prop('value')) {
+            addListItem(item);
+          }
+        });
+      });
+      hideLoadingMessage();
     });
   }
 
   /* Sets the searchbox to visible. */
   function showSearchBox() {
-    let searchbox = document.querySelector('.menubox');
+    let searchbox = $('.menubox');
 
-    if(searchbox) {
-      searchbox.classList.add('menubox__visible');
+    if(searchbox.get(0)) {
+      searchbox.addClass('menubox__visible');
 
-      let searchBtn = document.querySelector('.search_button');
-      searchBtn.parentNode.removeChild(searchBtn);
+      let searchBtn = $('.search_button');
+      searchBtn.remove();
     }
   }
 
   /* Removes the pokedex list of pokemon and replaces the next button with a reset button */
   function clearListItems() {
-    let pokedexBox = document.querySelector('.pokedex__box');
+    let pokedexBox = $('.pokedex__box');
 
-    let list = document.querySelector('.pokedex__list');
-    if(list) {
-      list.parentNode.removeChild(list);
+    let list = $('.pokedex__list');
+    if(list.get(0)) {
+      list.remove();
     }
-    let oldBtn = document.querySelector('.formatted');
-    if(oldBtn) {
-      oldBtn.parentNode.removeChild(oldBtn);
+    let oldBtn = $('.formatted');
+    if(oldBtn.get(0)) {
+      oldBtn.remove();
     }
-    let resetBtn = document.createElement('button');
-    resetBtn.classList.add('formatted');
-    resetBtn.innerText = 'Reset';
+    let resetBtn = $('<button>');
+    resetBtn.addClass('formatted');
+    resetBtn.text('Reset');
 
-    resetBtn.addEventListener('click', () => {
+    resetBtn.on('click', () => {
       pokeCount = 0;
       pokemonList = [];
       targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
@@ -230,7 +244,7 @@ let pokemonRepository = (function() {
       createDocument();
     });
 
-    pokedexBox.appendChild(resetBtn);
+    pokedexBox.append(resetBtn);
   }
 
   /* Adds a pokemon's information to pokedex__box and creates a list for them
@@ -240,36 +254,34 @@ let pokemonRepository = (function() {
       return;
     }
 
-    let pokedexBox = document.querySelector('.pokedex__box');
+    let pokedexBox = $('.pokedex__box');
 
-    let list = document.querySelector('.pokedex__list');
+    let list = $('.pokedex__list');
 
-    if(!list) {
-      list = document.createElement('ul');
-      list.classList.add('pokedex__list');
-      pokedexBox.appendChild(list);
+    if(!list.get(0)) {
+      list = $('<ul>');
+      list.addClass('pokedex__list');
+      pokedexBox.append(list);
     }
 
-    let li = document.createElement('li');
-    let btn = document.createElement('button');
+    let li = $('<li>');
+    let btn = $('<button>');
 
-    btn.innerText = capitalizeWord(pokemon.name);
+    btn.text(capitalizeWord(pokemon.name));
 
-    btn.addEventListener('click', () => { // Call your function through the event function, NOT directly!
+    btn.on('click', () => { // Call your function through the event function, NOT directly!
       showDetails(pokemon);
     });
 
-    li.appendChild(btn);
-    list.appendChild(li);
+    li.append(btn);
+    list.append(li);
   }
 
   /* Loads the api's json and creates the pokemon objects from it. */
   function loadList(url) {
     showLoadingMessage(null);
     // Wait for the list to return
-    return fetch(url).then(function(response) {
-      return response.json();
-    }).then(function(json) {
+    return $.ajax(url, { dataType: 'json'}).then(function(json) {
       hideLoadingMessage();
       // The objects that were returned are used to create the pokemon
       nextUrl = json.next;
@@ -294,9 +306,7 @@ let pokemonRepository = (function() {
     showLoadingMessage(item);
     let url = item.detailsUrl;
 
-    return fetch(url).then(function(response) {
-      return response.json();
-    }).then(function(details) {
+    return $.ajax(url, { dataType: 'json'}).then(function(details) {
       hideLoadingMessage();
       // Set our pokemon data to the item's data
       item.id = details.id;
@@ -320,9 +330,7 @@ let pokemonRepository = (function() {
     showLoadingMessage(item);
     let url = item.speciesUrl;
     // Wait for the species object
-    return fetch(url).then(function(response) {
-      return response.json();
-    }).then(function(text) {
+    return $.ajax(url, { dataType: 'json'}).then(function(text) {
       hideLoadingMessage();
       for(let i = 0; i < text.flavor_text_entries.length; i++) {
         let entry = text.flavor_text_entries[i];
@@ -338,25 +346,32 @@ let pokemonRepository = (function() {
   }
 
   /* Lets the user know what's loading after they do an action. */
-  function showLoadingMessage(resource) {
-    let fillText = document.querySelector('.pokedex__text');
-    if(resource === null) {
-      fillText.innerText = "Loading pokemon api...";
+  function showLoadingMessage(resource, optText) {
+    let fillText = $('.pokedex__text');
+    // If the optional text is passed to this
+    if(optText && optText !== null) {
+        fillText.text(optText + ' ' + resource.name + "...");
     }
+    // Otherwise, default text is displayed
     else {
-      fillText.innerText = 'Loading ' + resource.name + "...";
+      if(resource === null) {
+        fillText.text("Loading pokemon api...");
+      }
+      else {
+        fillText.text('Loading ' + resource.name + "...");
+      }
     }
   }
 
   /* Resets the loading text to display 'Pokedex'. */
   function hideLoadingMessage() {
-    let fillText = document.querySelector('.pokedex__text');
-    fillText.innerText = 'Pokedex';
+    let fillText = $('.pokedex__text');
+    fillText.text('Pokedex');
   }
 
   /* Hides the pokebox from display */
   function hidePokebox() {
-    pokeContainer.classList.remove('is-visible');
+    pokeContainer.removeClass('is-visible');
     lastId = null;
   }
 
@@ -364,62 +379,63 @@ let pokemonRepository = (function() {
   function showPokebox(pokemon) {
     lastId = pokemon.id - 1;
 
-    pokeContainer.innerHTML = '';
+    pokeContainer.html('');
 
-    let pokebox = document.createElement('div');
-    pokebox.classList.add('pokebox');
+    let pokebox = $('<div>');
+    pokebox.addClass('pokebox');
 
-    let leftbox = document.createElement('div');
-    leftbox.classList.add('pokebox');
-    leftbox.classList.add('pokebox__left');
+    let leftbox = $('<div>');
+    leftbox.addClass('pokebox');
+    leftbox.addClass('pokebox__left');
 
-    let pokeTitle = document.createElement('h1');
-    pokeTitle.innerText = capitalizeWord(pokemon.name) + ' #' + pokemon.id;
+    let pokeTitle = $('<h1>');
+    pokeTitle.text(capitalizeWord(pokemon.name));
 
     let types = [];
 
     pokemon.types.forEach( type => {
-      let pokeType = document.createElement('span');
-      pokeType.classList.add('type-style');
-      pokeType.classList.add('type-style__' + type.type.name);
-      pokeType.innerText = capitalizeWord(type.type.name);
+      let pokeType = $('<span>');
+      pokeType.addClass('type-style');
+      pokeType.addClass('type-style__' + type.type.name);
+      pokeType.text(capitalizeWord(type.type.name));
       types.push(pokeType);
     });
 
-    let pokeImage = document.createElement('img');
-    pokeImage.src = pokemon.imageUrl;
-    pokeImage.classList.add('pokeimg');
-
-    let rightbox = document.createElement('div');
-    rightbox.classList.add('pokebox');
-    rightbox.classList.add('pokebox__right');
-
-    let contentTitle = document.createElement('h1');
-    contentTitle.innerText = 'Info';
-
-    let pokeContent = document.createElement('p');
-    pokeContent.innerText = 'Height: ' + (pokemon.height / 10).toFixed(1) + 'm\nWeight: ' + (pokemon.weight / 10).toFixed(1)
-    + 'kg\nBMI: ' + calculateBMI(pokemon) + '\n\nDescription: ' + pokemon.description;
-
-    leftbox.appendChild(pokeTitle);
-    leftbox.appendChild(pokeImage);
-    leftbox.appendChild(document.createElement('br'));
-    types.forEach(typeElement => {
-      leftbox.appendChild(typeElement);
+    let pokeImage = $('<img>').prop({
+      src: pokemon.imageUrl
     });
-    rightbox.appendChild(contentTitle);
-    rightbox.appendChild(pokeContent);
-    pokebox.appendChild(leftbox);
-    pokebox.appendChild(rightbox);
-    pokeContainer.appendChild(pokebox);
+    pokeImage.addClass('pokeimg');
 
-    pokeContainer.classList.add('is-visible');
+    let rightbox = $('<div>');
+    rightbox.addClass('pokebox');
+    rightbox.addClass('pokebox__right');
+
+    let contentTitle = $('<h1>');
+    contentTitle.text('Info');
+
+    let pokeContent = $('<p>');
+    pokeContent.html('Height: ' + (pokemon.height / 10).toFixed(1) + 'm<br>Weight: ' + (pokemon.weight / 10).toFixed(1)
+    + 'kg<br>BMI: ' + calculateBMI(pokemon) + '<br><br>Description: ' + pokemon.description);
+
+    leftbox.append(pokeTitle);
+    leftbox.append(pokeImage);
+    leftbox.append('<br>');
+    types.forEach(typeElement => {
+      leftbox.append(typeElement);
+    });
+    rightbox.append(contentTitle);
+    rightbox.append(pokeContent);
+    pokebox.append(leftbox);
+    pokebox.append(rightbox);
+    pokeContainer.append(pokebox);
+
+    pokeContainer.addClass('is-visible');
   }
 
   window.addEventListener('keydown', (e) => {
     e.preventDefault();
     // Close if the modal box is open, otherwise we ignore
-    if(pokeContainer.classList.contains('is-visible')) {
+    if(pokeContainer.hasClass('is-visible')) {
       if(e.key === 'Escape') {
         hidePokebox();
       }
@@ -436,10 +452,10 @@ let pokemonRepository = (function() {
     }
   });
 
-  pokeContainer.addEventListener('click', (e) => {
+  pokeContainer.on('click', (e) => {
     let target = e.target;
     // If the user clicks outside of the modal box, we close
-    if(target === pokeContainer) {
+    if(target === pokeContainer.get(0)) {
       hidePokebox();
     }
   });
