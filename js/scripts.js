@@ -5,10 +5,6 @@ let pokemonRepository = (function() {
                    'fairy'];
   let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
   let nextUrl = null;
-  let pokeCount = 0;
-
-  let pokeContainer = $('#pokemon-container');
-  let lastId = null;
 
   function capitalizeWord(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -16,13 +12,14 @@ let pokemonRepository = (function() {
 
   /* Creates the inital document elements */
   function createDocument() {
-    let pokedexBox = $('.pokedex__box');
+    let pokedexBox = $('.pokedex-box');
 
-    let searchBtn = $('.search_button');
+    let searchBtn = $('#search-button');
 
     if(!(searchBtn.get(0))) {
       searchBtn = $('<button>');
-      searchBtn.addClass('search_button');
+      searchBtn.attr('id', 'search-button');
+      searchBtn.addClass('btn');
       searchBtn.text('Search');
 
       searchBtn.on('click', () => {
@@ -38,13 +35,12 @@ let pokemonRepository = (function() {
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
       out of pokemon to add.*/
   function populateList() {
-    let pokedexBox = $('.pokedex__box');
+    let pokedexBox = $('.pokedex-box');
 
     // Load the list of pokemon from the api
     loadList(targetUrl).then(function(multi) {
       multi.forEach( pokemon => {
         addListItem(pokemon);
-        pokeCount++;
       });
 
       createSearchBox();
@@ -58,7 +54,7 @@ let pokemonRepository = (function() {
       // Create next button if there is something to create it for
       if(nextUrl !== null) {
         let nextBtn = $('<button>');
-        nextBtn.addClass('formatted');
+        nextBtn.addClass('formatted btn');
         nextBtn.text('Next');
 
         nextBtn.on('click', () => {
@@ -105,7 +101,7 @@ let pokemonRepository = (function() {
   /* Creates the search box if it doesn't exist and removes the
      visible property if it does already exists. */
   function createSearchBox() {
-    let target = $('.pokedex__list');
+    let target = $('.pokedex-list');
 
     if(!target) {
       console.error('Couldn\'t find the pokedex list.');
@@ -116,11 +112,12 @@ let pokemonRepository = (function() {
     if(box.get(0)) {
       box.removeClass('menubox__visible');
 
-      let searchBtn = $('.search_button');
+      let searchBtn = $('#search-button');
 
       if(!(searchBtn.get(0))) {
         searchBtn = $('<button>');
-        searchBtn.addClass('search_button');
+        searchBtn.attr('id', 'search-button');
+        searchBtn.addClass('btn');
         searchBtn.text('Search');
 
         searchBtn.on('click', () => {
@@ -140,7 +137,11 @@ let pokemonRepository = (function() {
     titleText.text('Type ');
 
     let list =$('<ul>');
-    list.addClass('menu__list');
+    list.addClass('menu__list container');
+
+    let div = $('<div>');
+    div.addClass('row');
+    list.append(div);
 
     let items = [];
 
@@ -156,20 +157,21 @@ let pokemonRepository = (function() {
         handleTypeCheckbox(checkbox);
       });
       let label = $('<label>');
-      label.prop({for: 'menu item'});
-      label.text(' ' + capitalizeWord(pokeTypes[i]));
+      label.prop({for: 'menu-item'});
+      label.text('' + capitalizeWord(pokeTypes[i]));
       label.on('click', () => {
         checkbox.prop('checked', true);
         handleTypeCheckbox(checkbox);
       });
       let li = $('<li>');
+      li.addClass('col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2');
       li.append(checkbox);
       li.append(label);
       items.push(li);
     }
 
     items.forEach( item => {
-      list.append(item);
+      div.append(item);
     });
 
     box.append(titleText);
@@ -195,6 +197,8 @@ let pokemonRepository = (function() {
       promiseArray.push(promise);
     });
     Promise.all(promiseArray).then(function(items) {
+      pokemonList = [];
+      /* Compare the selected type to the pokemon's types */
       items.forEach(item => {
         item.types.forEach( type => {
           if(type.type.name == checkbox.prop('value')) {
@@ -213,16 +217,16 @@ let pokemonRepository = (function() {
     if(searchbox.get(0)) {
       searchbox.addClass('menubox__visible');
 
-      let searchBtn = $('.search_button');
+      let searchBtn = $('#search-button');
       searchBtn.remove();
     }
   }
 
   /* Removes the pokedex list of pokemon and replaces the next button with a reset button */
   function clearListItems() {
-    let pokedexBox = $('.pokedex__box');
+    let pokedexBox = $('.pokedex-box');
 
-    let list = $('.pokedex__list');
+    let list = $('.pokedex-list');
     if(list.get(0)) {
       list.remove();
     }
@@ -231,15 +235,13 @@ let pokemonRepository = (function() {
       oldBtn.remove();
     }
     let resetBtn = $('<button>');
-    resetBtn.addClass('formatted');
+    resetBtn.addClass('formatted btn');
     resetBtn.text('Reset');
 
     resetBtn.on('click', () => {
-      pokeCount = 0;
       pokemonList = [];
       targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
       nextUrl = null;
-      lastId = null;
       clearListItems();
       createDocument();
     });
@@ -247,25 +249,34 @@ let pokemonRepository = (function() {
     pokedexBox.append(resetBtn);
   }
 
-  /* Adds a pokemon's information to pokedex__box and creates a list for them
+  /* Adds a pokemon's information to pokedex-box and creates a list for them
     if it doesn't already exist.*/
   function addListItem(pokemon) {
     if(!add(pokemon)) {
       return;
     }
 
-    let pokedexBox = $('.pokedex__box');
+    let pokedexBox = $('.pokedex-box');
 
-    let list = $('.pokedex__list');
+    let list = $('.pokedex-list');
+    let div;
 
     if(!list.get(0)) {
       list = $('<ul>');
-      list.addClass('pokedex__list');
+      list.addClass('pokedex-list container');
+      div = $('<div>');
+      div.addClass('row');
+      list.append(div);
       pokedexBox.append(list);
     }
 
+    div = $('.row').last();
+
     let li = $('<li>');
+    li.addClass('col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2');
     let btn = $('<button>');
+    btn.addClass('list-btn btn');
+
 
     btn.text(capitalizeWord(pokemon.name));
 
@@ -274,7 +285,7 @@ let pokemonRepository = (function() {
     });
 
     li.append(btn);
-    list.append(li);
+    div.append(li);
   }
 
   /* Loads the api's json and creates the pokemon objects from it. */
@@ -291,7 +302,6 @@ let pokemonRepository = (function() {
           name: item.name,
           detailsUrl: item.url
         };
-      // add(pokemon);
       multi.push(pokemon);
       });
       return multi; // Return a new list to add to our scrolling list of pokemon
@@ -347,7 +357,7 @@ let pokemonRepository = (function() {
 
   /* Lets the user know what's loading after they do an action. */
   function showLoadingMessage(resource, optText) {
-    let fillText = $('.pokedex__text');
+    let fillText = $('.pokedex-text');
     // If the optional text is passed to this
     if(optText && optText !== null) {
         fillText.text(optText + ' ' + resource.name + "...");
@@ -365,28 +375,24 @@ let pokemonRepository = (function() {
 
   /* Resets the loading text to display 'Pokedex'. */
   function hideLoadingMessage() {
-    let fillText = $('.pokedex__text');
+    let fillText = $('.pokedex-text');
     fillText.text('Pokedex');
-  }
-
-  /* Hides the pokebox from display */
-  function hidePokebox() {
-    pokeContainer.removeClass('is-visible');
-    lastId = null;
   }
 
   /* Creates the pokebox and displays the selected pokemon inside of it. */
   function showPokebox(pokemon) {
-    lastId = pokemon.id - 1;
+    let modalTitle = $('.modal-title');
+    let modalBody = $('.modal-body');
+    let modalFooter = $('.modal-footer');
 
-    pokeContainer.html('');
+    modalTitle.empty();
+    modalBody.empty();
 
-    let pokebox = $('<div>');
-    pokebox.addClass('pokebox');
+    modalBody.addClass('pokebox');
+    modalFooter.addClass('pokebox');
 
     let leftbox = $('<div>');
-    leftbox.addClass('pokebox');
-    leftbox.addClass('pokebox__left');
+    leftbox.addClass('pokebox pokebox__left');
 
     let pokeTitle = $('<h1>');
     pokeTitle.text(capitalizeWord(pokemon.name));
@@ -404,11 +410,16 @@ let pokemonRepository = (function() {
     let pokeImage = $('<img>').prop({
       src: pokemon.imageUrl
     });
-    pokeImage.addClass('pokeimg');
+    pokeImage.addClass('pokeimg modal-img');
+
+    pokeImage.on('dblclick', () => {
+      pokeImage.css('animation-name', 'rotate3D');
+      pokeImage.css('animation-duration', '1s');
+      pokeImage.css('animation-iteration-count', '1');
+    });
 
     let rightbox = $('<div>');
-    rightbox.addClass('pokebox');
-    rightbox.addClass('pokebox__right');
+    rightbox.addClass('pokebox pokebox__right');
 
     let contentTitle = $('<h1>');
     contentTitle.text('Info');
@@ -425,40 +436,10 @@ let pokemonRepository = (function() {
     });
     rightbox.append(contentTitle);
     rightbox.append(pokeContent);
-    pokebox.append(leftbox);
-    pokebox.append(rightbox);
-    pokeContainer.append(pokebox);
-
-    pokeContainer.addClass('is-visible');
+    modalBody.append(leftbox);
+    modalBody.append(rightbox);
+    $('#pokemon-container').modal();
   }
-
-  window.addEventListener('keydown', (e) => {
-    e.preventDefault();
-    // Close if the modal box is open, otherwise we ignore
-    if(pokeContainer.hasClass('is-visible')) {
-      if(e.key === 'Escape') {
-        hidePokebox();
-      }
-      else if(lastId !== null) {
-        if(e.key === 'ArrowRight' && lastId < pokeCount - 1) {
-          lastId += 1;
-          showDetails(pokemonList[lastId]);
-        }
-        else if(e.key === 'ArrowLeft' && lastId > 0) {
-          lastId -= 1;
-          showDetails(pokemonList[lastId]);
-        }
-      }
-    }
-  });
-
-  pokeContainer.on('click', (e) => {
-    let target = e.target;
-    // If the user clicks outside of the modal box, we close
-    if(target === pokeContainer.get(0)) {
-      hidePokebox();
-    }
-  });
 
   return {
     add: add,
