@@ -1,11 +1,13 @@
-:root {
-  --color-primary: #7ae869;
-  --color-secondary: #e8e869;
-  --color-triary: #69b8e8;
-}
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v8.3.6,
+* Autoprefixer: v10.3.1
+* Browsers: last 4 version
+*/
 
 * {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 body {
@@ -20,7 +22,7 @@ body {
 
 #search-button {
   color: black;
-  background-color: var(--color-secondary);
+  background-color: #e8e869;
   margin-top: 2px;
   margin-bottom: 8px;
 }
@@ -28,7 +30,7 @@ body {
 .bg-black {
   background-color: black !important;
   opacity: 95%;
-  border: 2px solid var(--color-triary);
+  border: 2px solid #69b8e8;
 }
 
 .nav-link {
@@ -40,15 +42,17 @@ body {
 }
 
 .text-yellow {
-  color: var(--color-secondary) !important;
+  color: #e8e869 !important;
 }
 
 .list-btn {
-  background-color: var(--color-primary);
+  background-color: #7ae869;
   color: black;
   width: 100%;
   margin: 1px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  -webkit-transition: 0.1s opacity;
+  -o-transition: 0.1s opacity;
   transition: 0.1s opacity;
 }
 
@@ -58,9 +62,11 @@ body {
 }
 
 .close-btn {
-  background-color: var(--color-secondary);
+  background-color: #e8e869;
   color: black;
   border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  -webkit-transition: 0.1s opacity;
+  -o-transition: 0.1s opacity;
   transition: 0.1s opacity;
 }
 
@@ -71,9 +77,10 @@ body {
 
 .pokebox {
   margin: auto;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   background: black;
-  border: 2px solid var(--color-primary);
+  border: 2px solid #7ae869;
   color: white;
   padding: 5px;
   width: 100%;
@@ -92,7 +99,7 @@ body {
   height: 100%;
   min-height: 380px;
   width: 50%;
-  border: 1px solid var(--color-primary);
+  border: 1px solid #7ae869;
   overflow: hidden;
 }
 
@@ -101,7 +108,7 @@ body {
   height: 100%;
   min-height: 380px;
   width: 50%;
-  border: 1px solid var(--color-primary);
+  border: 1px solid #7ae869;
   overflow: hidden;
 }
 
@@ -110,11 +117,11 @@ body {
 }
 
 .pokebox h1 {
-  color: var(--color-primary);
+  color: #7ae869;
 }
 
 .pokeimg {
-  background: var(--color-primary);
+  background: #7ae869;
   border-radius: 50%;
   width: 75%;
   height: 75%;
@@ -206,7 +213,7 @@ body {
   background-color: black;
   opacity: 95%;
   border-radius: 2px;
-  border: 2px solid var(--color-primary);
+  border: 2px solid #7ae869;
   margin-top: 3px;
   margin-left: auto;
   margin-right: auto;
@@ -234,6 +241,8 @@ body {
   margin-bottom: 30px;
   border-radius: 3px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  -webkit-transition: 0.1s opacity;
+  -o-transition: 0.1s opacity;
   transition: 0.1s opacity;
 }
 
@@ -247,7 +256,7 @@ body {
 
 .menubox {
   display: none;
-  border: 1px solid var(--color-secondary);
+  border: 1px solid #e8e869;
   color: white;
   width: 90%;
   padding: 5px;
@@ -266,11 +275,24 @@ body {
   display: inline-block;
 }
 
-@keyframes rotate3D {
+@-webkit-keyframes rotate3D {
   from {
-    transform: rotate3d(0);
+    -webkit-transform: rotate3d(0);
+            transform: rotate3d(0);
   }
   to {
-    transform: rotate3d(1, 1, 1, 360deg);
+    -webkit-transform: rotate3d(1, 1, 1, 360deg);
+            transform: rotate3d(1, 1, 1, 360deg);
+  }
+}
+
+@keyframes rotate3D {
+  from {
+    -webkit-transform: rotate3d(0);
+            transform: rotate3d(0);
+  }
+  to {
+    -webkit-transform: rotate3d(1, 1, 1, 360deg);
+            transform: rotate3d(1, 1, 1, 360deg);
   }
 }

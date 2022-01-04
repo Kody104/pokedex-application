@@ -1,8 +1,25 @@
 let pokemonRepository = (function() {
   let pokemonList = [];
-  let pokeTypes = ['normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost',
-                   'steel', 'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark',
-                   'fairy'];
+  let pokeTypes = [
+    'normal',
+    'fighting',
+    'flying',
+    'poison',
+    'ground',
+    'rock',
+    'bug',
+    'ghost',
+    'steel',
+    'fire',
+    'water',
+    'grass',
+    'electric',
+    'psychic',
+    'ice',
+    'dragon',
+    'dark',
+    'fairy'
+  ];
   let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
   let nextUrl = null;
 
@@ -16,14 +33,14 @@ let pokemonRepository = (function() {
 
     let searchBtn = $('#search-button');
 
-    if(!(searchBtn.get(0))) {
+    if (!searchBtn.get(0)) {
       searchBtn = $('<button>');
       searchBtn.attr('id', 'search-button');
       searchBtn.addClass('btn');
       searchBtn.text('Search');
 
       searchBtn.on('click', () => {
-          showSearchBox();
+        showSearchBox();
       });
 
       pokedexBox.append(searchBtn);
@@ -39,7 +56,7 @@ let pokemonRepository = (function() {
 
     // Load the list of pokemon from the api
     loadList(targetUrl).then(function(multi) {
-      multi.forEach( pokemon => {
+      multi.forEach(pokemon => {
         addListItem(pokemon);
       });
 
@@ -47,14 +64,14 @@ let pokemonRepository = (function() {
 
       // Remove old button if it exists
       let oldBtn = $('.formatted');
-      if(oldBtn.get(0)) {
+      if (oldBtn.get(0)) {
         oldBtn.remove();
       }
 
       // Create next button if there is something to create it for
-      if(nextUrl !== null) {
+      if (nextUrl !== null) {
         let nextBtn = $('<button>');
-        nextBtn.addClass('formatted btn');
+        nextBtn.addClass('formatted formatted__secondary btn');
         nextBtn.text('Next');
 
         nextBtn.on('click', () => {
@@ -69,7 +86,8 @@ let pokemonRepository = (function() {
 
   /* Adds a pokemon to the list of pokemon tracked by the application. */
   function add(pokemon) {
-    if(typeof pokemon !== 'object') { // Safety check so that only objects can pass
+    if (typeof pokemon !== 'object') {
+      // Safety check so that only objects can pass
       console.warn('You can only add objects to the respository.');
       return false;
     }
@@ -91,7 +109,7 @@ let pokemonRepository = (function() {
   /* Loads the details of a pokemon, then loads it's description, then creates the pokebox modal. */
   function showDetails(pokemon) {
     // Wait for the details to load, then print them to console.
-    loadDetails(pokemon).then(function () {
+    loadDetails(pokemon).then(function() {
       loadDescription(pokemon).then(function() {
         showPokebox(pokemon);
       });
@@ -103,25 +121,25 @@ let pokemonRepository = (function() {
   function createSearchBox() {
     let target = $('.pokedex-list');
 
-    if(!target) {
+    if (!target) {
       console.error('Couldn\'t find the pokedex list.');
       return;
     }
 
     let box = $('.menubox');
-    if(box.get(0)) {
+    if (box.get(0)) {
       box.removeClass('menubox__visible');
 
       let searchBtn = $('#search-button');
 
-      if(!(searchBtn.get(0))) {
+      if (!searchBtn.get(0)) {
         searchBtn = $('<button>');
         searchBtn.attr('id', 'search-button');
         searchBtn.addClass('btn');
         searchBtn.text('Search');
 
         searchBtn.on('click', () => {
-            showSearchBox();
+          showSearchBox();
         });
 
         searchBtn.insertBefore(target);
@@ -136,7 +154,7 @@ let pokemonRepository = (function() {
     titleText.css('display', 'inline');
     titleText.text('Type ');
 
-    let list =$('<ul>');
+    let list = $('<ul>');
     list.addClass('menu__list container');
 
     let div = $('<div>');
@@ -145,7 +163,7 @@ let pokemonRepository = (function() {
 
     let items = [];
 
-    for(let i = 0; i < pokeTypes.length; i++) {
+    for (let i = 0; i < pokeTypes.length; i++) {
       let checkbox = $('<input>');
       checkbox.prop({
         type: 'radio',
@@ -157,7 +175,7 @@ let pokemonRepository = (function() {
         handleTypeCheckbox(checkbox);
       });
       let label = $('<label>');
-      label.prop({for: 'menu-item'});
+      label.prop({ for: 'menu-item' });
       label.text('' + capitalizeWord(pokeTypes[i]));
       label.on('click', () => {
         checkbox.prop('checked', true);
@@ -170,7 +188,7 @@ let pokemonRepository = (function() {
       items.push(li);
     }
 
-    items.forEach( item => {
+    items.forEach(item => {
       div.append(item);
     });
 
@@ -187,8 +205,8 @@ let pokemonRepository = (function() {
 
   function comparePokemonToType(checkbox) {
     let promiseArray = [];
-    pokemonList.forEach( pokemon => {
-      let promise = new Promise(function(resolve, reject) {
+    pokemonList.forEach(pokemon => {
+      let promise = new Promise(function(resolve) {
         loadDetails(pokemon).then(function() {
           showLoadingMessage(pokemon, 'Indexing');
           resolve(pokemon);
@@ -200,8 +218,8 @@ let pokemonRepository = (function() {
       pokemonList = [];
       /* Compare the selected type to the pokemon's types */
       items.forEach(item => {
-        item.types.forEach( type => {
-          if(type.type.name == checkbox.prop('value')) {
+        item.types.forEach(type => {
+          if (type.type.name == checkbox.prop('value')) {
             addListItem(item);
           }
         });
@@ -214,7 +232,7 @@ let pokemonRepository = (function() {
   function showSearchBox() {
     let searchbox = $('.menubox');
 
-    if(searchbox.get(0)) {
+    if (searchbox.get(0)) {
       searchbox.addClass('menubox__visible');
 
       let searchBtn = $('#search-button');
@@ -227,11 +245,11 @@ let pokemonRepository = (function() {
     let pokedexBox = $('.pokedex-box');
 
     let list = $('.pokedex-list');
-    if(list.get(0)) {
+    if (list.get(0)) {
       list.remove();
     }
     let oldBtn = $('.formatted');
-    if(oldBtn.get(0)) {
+    if (oldBtn.get(0)) {
       oldBtn.remove();
     }
     let resetBtn = $('<button>');
@@ -252,7 +270,7 @@ let pokemonRepository = (function() {
   /* Adds a pokemon's information to pokedex-box and creates a list for them
     if it doesn't already exist.*/
   function addListItem(pokemon) {
-    if(!add(pokemon)) {
+    if (!add(pokemon)) {
       return;
     }
 
@@ -261,7 +279,7 @@ let pokemonRepository = (function() {
     let list = $('.pokedex-list');
     let div;
 
-    if(!list.get(0)) {
+    if (!list.get(0)) {
       list = $('<ul>');
       list.addClass('pokedex-list container');
       div = $('<div>');
@@ -277,10 +295,10 @@ let pokemonRepository = (function() {
     let btn = $('<button>');
     btn.addClass('list-btn btn');
 
-
     btn.text(capitalizeWord(pokemon.name));
 
-    btn.on('click', () => { // Call your function through the event function, NOT directly!
+    btn.on('click', () => {
+      // Call your function through the event function, NOT directly!
       showDetails(pokemon);
     });
 
@@ -292,23 +310,25 @@ let pokemonRepository = (function() {
   function loadList(url) {
     showLoadingMessage(null);
     // Wait for the list to return
-    return $.ajax(url, { dataType: 'json'}).then(function(json) {
-      hideLoadingMessage();
-      // The objects that were returned are used to create the pokemon
-      nextUrl = json.next;
-      multi = [];
-      json.results.forEach(function (item) {
-        let pokemon = {
-          name: item.name,
-          detailsUrl: item.url
-        };
-      multi.push(pokemon);
+    return $.ajax(url, { dataType: 'json' })
+      .then(function(json) {
+        hideLoadingMessage();
+        // The objects that were returned are used to create the pokemon
+        nextUrl = json.next;
+        let multi = [];
+        json.results.forEach(function(item) {
+          let pokemon = {
+            name: item.name,
+            detailsUrl: item.url
+          };
+          multi.push(pokemon);
+        });
+        return multi; // Return a new list to add to our scrolling list of pokemon
+      })
+      .catch(function(e) {
+        hideLoadingMessage();
+        console.error(e);
       });
-      return multi; // Return a new list to add to our scrolling list of pokemon
-    }).catch(function(e) {
-      hideLoadingMessage();
-      console.error(e);
-    })
   }
 
   /* Gets the proporties of the pokemon by it's detailsUrl. */
@@ -316,22 +336,24 @@ let pokemonRepository = (function() {
     showLoadingMessage(item);
     let url = item.detailsUrl;
 
-    return $.ajax(url, { dataType: 'json'}).then(function(details) {
-      hideLoadingMessage();
-      // Set our pokemon data to the item's data
-      item.id = details.id;
-      if(item.id > 898) {
-        item.id -= 9102; // They jump up the id by a lot here
-      }
-      item.imageUrl = details.sprites.front_default;
-      item.speciesUrl = details.species.url;
-      item.height = details.height;
-      item.weight = details.weight
-      item.types = details.types;
-    }).catch(function(e) {
-      hideLoadingMessage();
-      console.log(e);
-    });
+    return $.ajax(url, { dataType: 'json' })
+      .then(function(details) {
+        hideLoadingMessage();
+        // Set our pokemon data to the item's data
+        item.id = details.id;
+        if (item.id > 898) {
+          item.id -= 9102; // They jump up the id by a lot here
+        }
+        item.imageUrl = details.sprites.front_default;
+        item.speciesUrl = details.species.url;
+        item.height = details.height;
+        item.weight = details.weight;
+        item.types = details.types;
+      })
+      .catch(function(e) {
+        hideLoadingMessage();
+        console.log(e);
+      });
   }
 
   /* Gets the description object of a pokemon and returns the first one
@@ -340,56 +362,61 @@ let pokemonRepository = (function() {
     showLoadingMessage(item);
     let url = item.speciesUrl;
     // Wait for the species object
-    return $.ajax(url, { dataType: 'json'}).then(function(text) {
-      hideLoadingMessage();
-      for(let i = 0; i < text.flavor_text_entries.length; i++) {
-        let entry = text.flavor_text_entries[i];
-        if(entry.language.name === 'en') {
-          item.description = entry.flavor_text;
-          break;
+    return $.ajax(url, { dataType: 'json' })
+      .then(function(text) {
+        hideLoadingMessage();
+        for (let i = 0; i < text.flavor_text_entries.length; i++) {
+          let entry = text.flavor_text_entries[i];
+          if (entry.language.name === 'en') {
+            item.description = entry.flavor_text;
+            break;
+          }
         }
-      }
-    }).catch(function(e) {
-      hideLoadingMessage();
-      console.log(e);
-    });
+      })
+      .catch(function(e) {
+        hideLoadingMessage();
+        console.log(e);
+      });
   }
 
   /* Lets the user know what's loading after they do an action. */
   function showLoadingMessage(resource, optText) {
-    let fillText = $('.pokedex-text');
+    let target = $('.pokedex-text');
+    let fillText = $('<h2>');
     // If the optional text is passed to this
-    if(optText && optText !== null) {
-        fillText.text(optText + ' ' + resource.name + "...");
+    if (optText && optText !== null) {
+      fillText.text(optText + ' ' + resource.name + '...');
     }
     // Otherwise, default text is displayed
     else {
-      if(resource === null) {
-        fillText.text("Loading pokemon api...");
-      }
-      else {
-        fillText.text('Loading ' + resource.name + "...");
+      if (resource === null) {
+        fillText.text('Loading pokemon api...');
+      } else {
+        fillText.text('Loading ' + resource.name + '...');
       }
     }
+    let loadingDiv = $('<div class="spinner-border text-yellow" role="status"><span class="sr-only">Loading...</span>');
+    target.empty();
+    target.append(fillText);
+    target.append(loadingDiv);
   }
 
   /* Resets the loading text to display 'Pokedex'. */
   function hideLoadingMessage() {
-    let fillText = $('.pokedex-text');
+    let target = $('.pokedex-text');
+    let fillText = $('<h2>');
     fillText.text('Pokedex');
+    target.empty();
+    target.append(fillText);
   }
 
   /* Creates the pokebox and displays the selected pokemon inside of it. */
   function showPokebox(pokemon) {
     let modalTitle = $('.modal-title');
     let modalBody = $('.modal-body');
-    let modalFooter = $('.modal-footer');
 
     modalTitle.empty();
     modalBody.empty();
-
-    modalBody.addClass('pokebox');
-    modalFooter.addClass('pokebox');
 
     let leftbox = $('<div>');
     leftbox.addClass('pokebox pokebox__left');
@@ -399,7 +426,7 @@ let pokemonRepository = (function() {
 
     let types = [];
 
-    pokemon.types.forEach( type => {
+    pokemon.types.forEach(type => {
       let pokeType = $('<span>');
       pokeType.addClass('type-style');
       pokeType.addClass('type-style__' + type.type.name);
@@ -425,8 +452,16 @@ let pokemonRepository = (function() {
     contentTitle.text('Info');
 
     let pokeContent = $('<p>');
-    pokeContent.html('Height: ' + (pokemon.height / 10).toFixed(1) + 'm<br>Weight: ' + (pokemon.weight / 10).toFixed(1)
-    + 'kg<br>BMI: ' + calculateBMI(pokemon) + '<br><br>Description: ' + pokemon.description);
+    pokeContent.html(
+      'Height: ' +
+        (pokemon.height / 10).toFixed(1) +
+        'm<br>Weight: ' +
+        (pokemon.weight / 10).toFixed(1) +
+        'kg<br>BMI: ' +
+        calculateBMI(pokemon) +
+        '<br><br>Description: ' +
+        pokemon.description
+    );
 
     leftbox.append(pokeTitle);
     leftbox.append(pokeImage);
