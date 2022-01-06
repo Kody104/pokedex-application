@@ -21,7 +21,6 @@ let pokemonRepository = (function() {
     'fairy'
   ];
   let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
-  let nextUrl = null;
 
   function capitalizeWord(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -49,39 +48,111 @@ let pokemonRepository = (function() {
     populateList();
   }
 
+  function refreshDocument() {
+    let pokedexBox = $('.pokedex-box');
+
+    let searchBtn = $('#search-button');
+
+    if (!searchBtn.get(0)) {
+      searchBtn = $('<button>');
+      searchBtn.attr('id', 'search-button');
+      searchBtn.addClass('btn');
+      searchBtn.text('Search');
+
+      searchBtn.on('click', () => {
+        showSearchBox();
+      });
+
+      pokedexBox.append(searchBtn);
+    }
+
+    pokemonList.forEach( pokemon => {
+      addListItem(pokemon);
+    });
+
+    createSearchBox();
+
+    // Create next button if there is something to create it for
+    if (pokemonList.length < 899) {
+      let nextBtn = $('<button>');
+      nextBtn.addClass('formatted formatted__secondary btn');
+      nextBtn.text('Next');
+
+      nextBtn.on('click', () => {
+        populateList();
+      });
+
+      pokedexBox.append(nextBtn);
+    }
+
+    // Remove old button if it exists
+    let oldBtn = $('.formatted');
+    if (oldBtn.get(0)) {
+      oldBtn.get(0).remove();
+    }
+  }
+
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
       out of pokemon to add.*/
   function populateList() {
     let pokedexBox = $('.pokedex-box');
 
     // Load the list of pokemon from the api
-    loadList(targetUrl).then(function(multi) {
-      multi.forEach(pokemon => {
-        addListItem(pokemon);
+    let promiseArray = [];
+    if(pokemonList.length + 150 <= 899) {
+      for(let i = 1; i < 151; i++) {
+        let promise = new Promise(function(resolve) {
+          loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
+            add(pokemon);
+            resolve(pokemon);
+            return pokemon;
+          }).then( (pokemon) => {
+            loadDescription(pokemon);
+          });
+        });
+        promiseArray.push(promise);
+      }
+    }
+    else {
+      let difference = 899 - pokemonList.length;
+      for(let i = 0; i < difference; i++) {
+        let promise = new Promise(function(resolve) {
+          loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
+            add(pokemon);
+            resolve(pokemon);
+            return pokemon;
+          }).then( (pokemon) => {
+            loadDescription(pokemon);
+          });
+        });
+        promiseArray.push(promise);
+      }
+    }
+    Promise.all(promiseArray).then(function(items) {
+      items.forEach((item) => {
+        addListItem(item);
       });
-
+    }).then( () => {
       createSearchBox();
 
-      // Remove old button if it exists
-      let oldBtn = $('.formatted');
-      if (oldBtn.get(0)) {
-        oldBtn.remove();
-      }
-
       // Create next button if there is something to create it for
-      if (nextUrl !== null) {
+      if (pokemonList.length < 899) {
         let nextBtn = $('<button>');
         nextBtn.addClass('formatted formatted__secondary btn');
         nextBtn.text('Next');
 
         nextBtn.on('click', () => {
-          targetUrl = nextUrl;
           populateList();
         });
 
         pokedexBox.append(nextBtn);
       }
     });
+    // Remove old button if it exists
+    let oldBtn = $('.formatted');
+    if (oldBtn.get(0)) {
+      oldBtn.get(0).remove();
+    }
   }
 
   /* Adds a pokemon to the list of pokemon tracked by the application. */
@@ -104,16 +175,6 @@ let pokemonRepository = (function() {
     let cmHeight = pokemon.height * 10;
     let kmWeight = pokemon.weight / 10;
     return ((kmWeight / cmHeight / cmHeight) * 10000).toFixed(1);
-  }
-
-  /* Loads the details of a pokemon, then loads it's description, then creates the pokebox modal. */
-  function showDetails(pokemon) {
-    // Wait for the details to load, then print them to console.
-    loadDetails(pokemon).then(function() {
-      loadDescription(pokemon).then(function() {
-        showPokebox(pokemon);
-      });
-    });
   }
 
   /* Creates the search box if it doesn't exist and removes the
@@ -204,27 +265,12 @@ let pokemonRepository = (function() {
   }
 
   function comparePokemonToType(checkbox) {
-    let promiseArray = [];
-    pokemonList.forEach(pokemon => {
-      let promise = new Promise(function(resolve) {
-        loadDetails(pokemon).then(function() {
-          showLoadingMessage(pokemon, 'Indexing');
-          resolve(pokemon);
-        });
+    pokemonList.forEach(item => {
+      item.types.forEach(type => {
+        if (type.type.name === checkbox.prop('value')) {
+          addListItem(item);
+        }
       });
-      promiseArray.push(promise);
-    });
-    Promise.all(promiseArray).then(function(items) {
-      pokemonList = [];
-      /* Compare the selected type to the pokemon's types */
-      items.forEach(item => {
-        item.types.forEach(type => {
-          if (type.type.name == checkbox.prop('value')) {
-            addListItem(item);
-          }
-        });
-      });
-      hideLoadingMessage();
     });
   }
 
@@ -257,11 +303,8 @@ let pokemonRepository = (function() {
     resetBtn.text('Reset');
 
     resetBtn.on('click', () => {
-      pokemonList = [];
-      targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
-      nextUrl = null;
       clearListItems();
-      createDocument();
+      refreshDocument();
     });
 
     pokedexBox.append(resetBtn);
@@ -270,10 +313,6 @@ let pokemonRepository = (function() {
   /* Adds a pokemon's information to pokedex-box and creates a list for them
     if it doesn't already exist.*/
   function addListItem(pokemon) {
-    if (!add(pokemon)) {
-      return;
-    }
-
     let pokedexBox = $('.pokedex-box');
 
     let list = $('.pokedex-list');
@@ -299,7 +338,7 @@ let pokemonRepository = (function() {
 
     btn.on('click', () => {
       // Call your function through the event function, NOT directly!
-      showDetails(pokemon);
+      showPokebox(pokemon);
     });
 
     li.append(btn);
@@ -314,45 +353,19 @@ let pokemonRepository = (function() {
       .then(function(json) {
         hideLoadingMessage();
         // The objects that were returned are used to create the pokemon
-        nextUrl = json.next;
-        let multi = [];
-        json.results.forEach(function(item) {
-          let pokemon = {
-            name: item.name,
-            detailsUrl: item.url
-          };
-          multi.push(pokemon);
-        });
-        return multi; // Return a new list to add to our scrolling list of pokemon
+        let pokemon = {
+          name: json.name,
+          imageUrl: json.sprites.front_default,
+          speciesUrl: json.species.url,
+          height: json.height,
+          weight: json.weight,
+          types: json.types
+        };
+        return pokemon;
       })
       .catch(function(e) {
         hideLoadingMessage();
         console.error(e);
-      });
-  }
-
-  /* Gets the proporties of the pokemon by it's detailsUrl. */
-  function loadDetails(item) {
-    showLoadingMessage(item);
-    let url = item.detailsUrl;
-
-    return $.ajax(url, { dataType: 'json' })
-      .then(function(details) {
-        hideLoadingMessage();
-        // Set our pokemon data to the item's data
-        item.id = details.id;
-        if (item.id > 898) {
-          item.id -= 9102; // They jump up the id by a lot here
-        }
-        item.imageUrl = details.sprites.front_default;
-        item.speciesUrl = details.species.url;
-        item.height = details.height;
-        item.weight = details.weight;
-        item.types = details.types;
-      })
-      .catch(function(e) {
-        hideLoadingMessage();
-        console.log(e);
       });
   }
 
@@ -481,7 +494,6 @@ let pokemonRepository = (function() {
     addListItem: addListItem,
     getAll: getAll,
     loadList: loadList,
-    loadDetails: loadDetails,
     targetUrl: targetUrl,
     createDocument: createDocument
   };
