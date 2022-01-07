@@ -104,10 +104,10 @@ let pokemonRepository = (function() {
         let promise = new Promise(function(resolve) {
           loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
             add(pokemon);
-            resolve(pokemon);
+            return pokemon;
           }).then( (pokemon) => {
             loadDescription(pokemon);
-            return pokemon;
+            resolve(pokemon);
           });
         });
         promiseArray.push(promise);
