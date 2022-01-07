@@ -105,9 +105,9 @@ let pokemonRepository = (function() {
           loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
             add(pokemon);
             resolve(pokemon);
-            return pokemon;
           }).then( (pokemon) => {
             loadDescription(pokemon);
+            return pokemon;
           });
         });
         promiseArray.push(promise);
@@ -307,6 +307,7 @@ let pokemonRepository = (function() {
       refreshDocument();
     });
 
+    pokedexBox.append('<br>');
     pokedexBox.append(resetBtn);
   }
 
