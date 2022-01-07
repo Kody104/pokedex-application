@@ -90,6 +90,7 @@ let pokemonRepository = (function() {
     if (oldBtn.get(0)) {
       oldBtn.get(0).remove();
     }
+    pokedexBox.find('br').remove();
   }
 
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
@@ -294,6 +295,7 @@ let pokemonRepository = (function() {
     if (list.get(0)) {
       list.remove();
     }
+    pokedexBox.find('br').remove();
     let oldBtn = $('.formatted');
     if (oldBtn.get(0)) {
       oldBtn.remove();
