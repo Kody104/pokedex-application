@@ -57,6 +57,13 @@ body {
   opacity: 0.8;
 }
 
+.list-btn__icon {
+  width: auto;
+  height: auto;
+  border-radius: 3rem;
+  /*  background: linear-gradient(30deg, #2f3441 50%, #212531 50%) */
+}
+
 .close-btn {
   background-color: var(--color-secondary);
   color: black;
@@ -155,7 +162,7 @@ body {
 }
 
 .type-style__fighting {
-  background-color:#C03028
+  background-color:#C03028;
 }
 
 .type-style__poison {
@@ -251,7 +258,7 @@ body {
   color: white;
   width: 90%;
   padding: 5px;
-  margin: 30px;
+  margin-bottom: 30px;
 }
 
 .menubox__visible {

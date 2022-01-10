@@ -20,11 +20,72 @@ let pokemonRepository = (function() {
     'dark',
     'fairy'
   ];
+  let colorTypes = {
+    'normal': '#A8A878',
+    'fighting': '#C03028',
+    'flying': '#A890F0',
+    'poison': '#A040A0',
+    'ground': '#E0C068',
+    'rock': '#B8A038',
+    'bug': '#A8B820',
+    'ghost': '#705898',
+    'steel': '#B8B8D0',
+    'fire': '#F08030',
+    'water': '#6890F0',
+    'grass': '#78C850',
+    'electric': '#F8D030',
+    'psychic': '#F85888',
+    'ice': '#98D8D8',
+    'dragon': '#7038F8',
+    'dark': '#705848',
+    'fairy': '#F0B6BC'
+  };
   let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
 
   function capitalizeWord(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
   }
+  /*
+  function getGenerationColor(generation) {
+    switch(generation) {
+      case 1:
+      {
+        return 'lightblue';
+      }
+      case 2:
+      {
+        return 'lightgreen';
+      }
+      case 3:
+      {
+        return 'lightgoldenrodyellow';
+      }
+      case 4:
+      {
+        return 'lightsalmon'
+      }
+      case 5:
+      {
+        return 'lightseagreen'
+      }
+      case 6:
+      {
+        return 'lightgrey';
+      }
+      case 7:
+      {
+        return 'lightsteelblue';
+      }
+      case 8:
+      {
+        return 'lightcoral';
+      }
+      default:
+      {
+        return '#7ae869';
+      }
+    }
+  }*/
 
   /* Creates the inital document elements */
   function createDocument() {
@@ -90,7 +151,7 @@ let pokemonRepository = (function() {
     if (oldBtn.get(0)) {
       oldBtn.get(0).remove();
     }
-    pokedexBox.find('br').remove();
+    pokedexBox.find('br').last().remove();
   }
 
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
@@ -120,16 +181,20 @@ let pokemonRepository = (function() {
         let promise = new Promise(function(resolve) {
           loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
             add(pokemon);
-            resolve(pokemon);
             return pokemon;
           }).then( (pokemon) => {
             loadDescription(pokemon);
+            resolve(pokemon);
           });
         });
         promiseArray.push(promise);
       }
     }
     Promise.all(promiseArray).then(function(items) {
+      // Sort the pokemon by their id, from 1 to the end.
+      pokemonList.sort( (a, b) => {
+        return a.id - b.id;
+      });
       items.forEach((item) => {
         addListItem(item);
       });
@@ -172,11 +237,12 @@ let pokemonRepository = (function() {
   }
 
   /* Calculates the bmi of a pokemon based on it's given weight and height properties. */
+  /*
   function calculateBMI(pokemon) {
     let cmHeight = pokemon.height * 10;
     let kmWeight = pokemon.weight / 10;
     return ((kmWeight / cmHeight / cmHeight) * 10000).toFixed(1);
-  }
+  }*/
 
   /* Creates the search box if it doesn't exist and removes the
      visible property if it does already exists. */
@@ -337,12 +403,26 @@ let pokemonRepository = (function() {
     let btn = $('<button>');
     btn.addClass('list-btn btn');
 
-    btn.text(capitalizeWord(pokemon.name));
-
     btn.on('click', () => {
       // Call your function through the event function, NOT directly!
       showPokebox(pokemon);
     });
+
+    let btnImg = $('<img>').prop({
+      src: pokemon.imageUrl
+    });
+    btnImg.addClass('list-btn__icon');
+    if(pokemon.types.length < 2) {
+      btnImg.css('background-color', colorTypes[pokemon.types[0].type.name]);
+    }
+    else {
+      btnImg.css('background', 'linear-gradient(30deg, ' + colorTypes[pokemon.types[0].type.name] + ' 50%, '
+       + colorTypes[pokemon.types[1].type.name] + ' 50%)');
+    }
+
+    btn.append(btnImg);
+
+    btn.html(btn.html() + '<br>' + capitalizeWord(pokemon.name));
 
     li.append(btn);
     div.append(li);
@@ -358,12 +438,37 @@ let pokemonRepository = (function() {
         // The objects that were returned are used to create the pokemon
         let pokemon = {
           name: json.name,
+          id: json.id,
           imageUrl: json.sprites.front_default,
           speciesUrl: json.species.url,
           height: json.height,
           weight: json.weight,
           types: json.types
         };
+        if(pokemon.id <= 151) {
+          pokemon.generation = 1;
+        }
+        else if(pokemon.id <= 251) {
+          pokemon.generation = 2;
+        }
+        else if(pokemon.id <= 386) {
+          pokemon.generation = 3;
+        }
+        else if(pokemon.id <= 493) {
+          pokemon.generation = 4;
+        }
+        else if(pokemon.id <= 649) {
+          pokemon.generation = 5;
+        }
+        else if(pokemon.id <= 721) {
+          pokemon.generation = 6;
+        }
+        else if(pokemon.id <= 809) {
+          pokemon.generation = 7;
+        }
+        else {
+          pokemon.generation = 8;
+        }
         return pokemon;
       })
       .catch(function(e) {
@@ -444,8 +549,8 @@ let pokemonRepository = (function() {
 
     pokemon.types.forEach(type => {
       let pokeType = $('<span>');
+      pokeType.css('background-color', colorTypes[type.type.name]);
       pokeType.addClass('type-style');
-      pokeType.addClass('type-style__' + type.type.name);
       pokeType.text(capitalizeWord(type.type.name));
       types.push(pokeType);
     });
@@ -473,8 +578,8 @@ let pokemonRepository = (function() {
         (pokemon.height / 10).toFixed(1) +
         'm<br>Weight: ' +
         (pokemon.weight / 10).toFixed(1) +
-        'kg<br>BMI: ' +
-        calculateBMI(pokemon) +
+        'kg<br>Created: ' +
+        'Generation ' + pokemon.generation +
         '<br><br>Description: ' +
         pokemon.description
     );
