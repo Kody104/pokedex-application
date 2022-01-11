@@ -45,47 +45,47 @@ let pokemonRepository = (function() {
   function capitalizeWord(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
   }
-  /*
+
   function getGenerationColor(generation) {
     switch(generation) {
       case 1:
       {
-        return 'lightblue';
+        return 'linear-gradient(30deg, #FF0000 50%, #0000FF 50%)';
       }
       case 2:
       {
-        return 'lightgreen';
+        return 'linear-gradient(30deg, #FADB28 50%, #B9B9B9 50%)';
       }
       case 3:
       {
-        return 'lightgoldenrodyellow';
+        return 'linear-gradient(30deg, #4338CA 50%, #CA3838 50%)';
       }
       case 4:
       {
-        return 'lightsalmon'
+        return 'linear-gradient(30deg, #29ACC9 50%, #C929C2 50%)';
       }
       case 5:
       {
-        return 'lightseagreen'
+        return 'linear-gradient(30deg, #050505 50%, #FAFAFA 50%)';
       }
       case 6:
       {
-        return 'lightgrey';
+        return 'linear-gradient(30deg, #2EAAC2 50%, #5B2EC2 50%)';
       }
       case 7:
       {
-        return 'lightsteelblue';
+        return 'linear-gradient(30deg, #FF9B22 50%, #6522FF 50%)';
       }
       case 8:
       {
-        return 'lightcoral';
+        return 'linear-gradient(30deg, #CF6C6C 50%, #6C78CF 50%)';
       }
       default:
       {
         return '#7ae869';
       }
     }
-  }*/
+  }
 
   /* Creates the inital document elements */
   function createDocument() {
@@ -237,12 +237,11 @@ let pokemonRepository = (function() {
   }
 
   /* Calculates the bmi of a pokemon based on it's given weight and height properties. */
-  /*
   function calculateBMI(pokemon) {
     let cmHeight = pokemon.height * 10;
     let kmWeight = pokemon.weight / 10;
     return ((kmWeight / cmHeight / cmHeight) * 10000).toFixed(1);
-  }*/
+  }
 
   /* Creates the search box if it doesn't exist and removes the
      visible property if it does already exists. */
@@ -408,6 +407,13 @@ let pokemonRepository = (function() {
       showPokebox(pokemon);
     });
 
+    let genBadge = $('<span class="badge">');
+    genBadge.css('float', 'right');
+    genBadge.css('background', getGenerationColor(pokemon.generation));
+    genBadge.text('Gen ' + pokemon.generation);
+
+    btn.append(genBadge);
+
     let btnImg = $('<img>').prop({
       src: pokemon.imageUrl
     });
@@ -466,8 +472,11 @@ let pokemonRepository = (function() {
         else if(pokemon.id <= 809) {
           pokemon.generation = 7;
         }
-        else {
+        else if(pokemon.id <= 898){
           pokemon.generation = 8;
+        }
+        else {
+          pokemon.generation = 0;
         }
         return pokemon;
       })
@@ -566,6 +575,10 @@ let pokemonRepository = (function() {
       pokeImage.css('animation-iteration-count', '1');
     });
 
+    let pokeGeneration = $('<span class="badge">');
+    pokeGeneration.text('Generation ' + pokemon.generation);
+    pokeGeneration.css('background', getGenerationColor(pokemon.generation));
+
     let rightbox = $('<div>');
     rightbox.addClass('pokebox pokebox__right');
 
@@ -578,8 +591,7 @@ let pokemonRepository = (function() {
         (pokemon.height / 10).toFixed(1) +
         'm<br>Weight: ' +
         (pokemon.weight / 10).toFixed(1) +
-        'kg<br>Created: ' +
-        'Generation ' + pokemon.generation +
+        'kg<br>BMI: ' + calculateBMI(pokemon) +
         '<br><br>Description: ' +
         pokemon.description
     );
@@ -590,6 +602,8 @@ let pokemonRepository = (function() {
     types.forEach(typeElement => {
       leftbox.append(typeElement);
     });
+    leftbox.append('<br>');
+    leftbox.append(pokeGeneration);
     rightbox.append(contentTitle);
     rightbox.append(pokeContent);
     modalBody.append(leftbox);

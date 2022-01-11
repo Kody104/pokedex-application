@@ -60,7 +60,7 @@ body {
 .list-btn__icon {
   width: auto;
   height: auto;
-  border-radius: 3rem;
+  border-radius: 50%;
   /*  background: linear-gradient(30deg, #2f3441 50%, #212531 50%) */
 }
 
@@ -137,76 +137,18 @@ body {
   margin: 2px;
 }
 
-.type-style__normal {
-  background-color:#A8A878;
-}
-
-.type-style__fire {
-  background-color:#F08030;
-}
-
-.type-style__water {
-  background-color:#6890F0;
-}
-
-.type-style__grass {
-  background-color: #78C850;
-}
-
-.type-style__electric {
-  background-color:#F8D030;
-}
-
-.type-style__ice {
-  background-color:#98D8D8;
-}
-
-.type-style__fighting {
-  background-color:#C03028;
-}
-
-.type-style__poison {
-  background-color: #A040A0;
-}
-
-.type-style__ground {
-  background-color:#E0C068;
-}
-
-.type-style__flying {
-  background-color:#A890F0;
-}
-
-.type-style__psychic {
-  background-color:#F85888;
-}
-
-.type-style__bug {
-  background-color:#A8B820;
-}
-
-.type-style__rock {
-  background-color:#B8A038;
-}
-
-.type-style__ghost {
-  background-color:#705898;
-}
-
-.type-style__dark {
-  background-color:#705848;
-}
-
-.type-style__dragon {
-  background-color:#7038F8;
-}
-
-.type-style__steel {
-  background-color:#B8B8D0;
-}
-
-.type-style__fairy {
-  background-color:#F0B6BC;
+.badge {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  border-radius: 5px;
+  font-size: 9pt;
+  color: white;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .pokedex {
