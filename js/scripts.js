@@ -407,7 +407,7 @@ let pokemonRepository = (function() {
       showPokebox(pokemon);
     });
 
-    let genBadge = $('<span class="badge">');
+    let genBadge = $('<span class="generation-badge">');
     genBadge.css('float', 'right');
     genBadge.css('background', getGenerationColor(pokemon.generation));
     genBadge.text('Gen ' + pokemon.generation);
@@ -575,7 +575,7 @@ let pokemonRepository = (function() {
       pokeImage.css('animation-iteration-count', '1');
     });
 
-    let pokeGeneration = $('<span class="badge">');
+    let pokeGeneration = $('<span class="generation-badge">');
     pokeGeneration.text('Generation ' + pokemon.generation);
     pokeGeneration.css('background', getGenerationColor(pokemon.generation));
 
