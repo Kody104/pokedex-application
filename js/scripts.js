@@ -319,7 +319,6 @@ let pokemonRepository = (function() {
     pokemonList.forEach(item => {
       item.types.forEach(type => {
         if (type.type.name === checkbox.prop('value')) {
-          selectedPokemon.push(item);
           addListItem(item);
         }
       });
