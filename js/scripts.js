@@ -1,26 +1,8 @@
 let pokemonRepository = (function() {
   let pokemonList = [];
-  let pokeTypes = [
-    'normal',
-    'fighting',
-    'flying',
-    'poison',
-    'ground',
-    'rock',
-    'bug',
-    'ghost',
-    'steel',
-    'fire',
-    'water',
-    'grass',
-    'electric',
-    'psychic',
-    'ice',
-    'dragon',
-    'dark',
-    'fairy'
-  ];
-  let colorTypes = {
+  let populating = false;
+
+  const typeColors = {
     'normal': '#A8A878',
     'fighting': '#C03028',
     'flying': '#A890F0',
@@ -40,12 +22,37 @@ let pokemonRepository = (function() {
     'dark': '#705848',
     'fairy': '#F0B6BC'
   };
-  let targetUrl = 'https://pokeapi.co/api/v2/pokemon/?limit=150';
+  const pokeTypes = Object.keys(typeColors);
+  const pokemonGeneration = (function() {
+    /* The count of each generations new pokemon, ordered from 1 to 8 */
+    const generationCount = [151, 100, 135, 107, 156, 72, 88, 89];
+    
+    function getTotalAtGeneration(gen) {
+      if(gen > generationCount.length) {
+        return -1;
+      }
+      let count = 0;
+      for(let i = 0; i < gen; i++) {
+        count += generationCount[i];
+      }
+      return count;
+    }
 
-  function capitalizeWord(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  }
+    function getGenerationCount(gen) {
+      if(gen > generationCount.length || gen < 1) {
+        return -1;
+      }
+      return generationCount[gen-1];
+    }
 
+    return {
+      getTotalAtGeneration: getTotalAtGeneration,
+      getGenerationCount: getGenerationCount
+    }
+
+  })();
+
+  /* Returns the game colors of the generation as a gradient */
   function getGenerationColor(generation) {
     switch(generation) {
       case 1:
@@ -109,6 +116,7 @@ let pokemonRepository = (function() {
     populateList();
   }
 
+  /* Refresh the page with the currently loaded list of pokemon */
   function refreshDocument() {
     let pokedexBox = $('.pokedex-box');
 
@@ -133,19 +141,6 @@ let pokemonRepository = (function() {
 
     createSearchBox();
 
-    // Create next button if there is something to create it for
-    if (pokemonList.length < 899) {
-      let nextBtn = $('<button>');
-      nextBtn.addClass('formatted formatted__secondary btn');
-      nextBtn.text('Next');
-
-      nextBtn.on('click', () => {
-        populateList();
-      });
-
-      pokedexBox.append(nextBtn);
-    }
-
     // Remove old button if it exists
     let oldBtn = $('.formatted');
     if (oldBtn.get(0)) {
@@ -157,10 +152,9 @@ let pokemonRepository = (function() {
   /* The default way of updating the pokedex. Creates pokemon buttons each time it's called, until it runs
       out of pokemon to add.*/
   function populateList() {
-    let pokedexBox = $('.pokedex-box');
-
     // Load the list of pokemon from the api
     let promiseArray = [];
+    populating = true;
     if(pokemonList.length + 150 <= 899) {
       for(let i = 1; i < 151; i++) {
         let promise = new Promise(function(resolve) {
@@ -201,18 +195,7 @@ let pokemonRepository = (function() {
     }).then( () => {
       createSearchBox();
 
-      // Create next button if there is something to create it for
-      if (pokemonList.length < 899) {
-        let nextBtn = $('<button>');
-        nextBtn.addClass('formatted formatted__secondary btn');
-        nextBtn.text('Next');
-
-        nextBtn.on('click', () => {
-          populateList();
-        });
-
-        pokedexBox.append(nextBtn);
-      }
+      populating = false;
     });
     // Remove old button if it exists
     let oldBtn = $('.formatted');
@@ -303,11 +286,12 @@ let pokemonRepository = (function() {
       });
       let label = $('<label>');
       label.prop({ for: 'menu-item' });
-      label.text('' + capitalizeWord(pokeTypes[i]));
+      label.text('' + pokeTypes[i]);
       label.on('click', () => {
         checkbox.prop('checked', true);
         handleTypeCheckbox(checkbox);
       });
+      label.css('text-transform', 'capitalize');
       let li = $('<li>');
       li.addClass('col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2');
       li.append(checkbox);
@@ -330,10 +314,12 @@ let pokemonRepository = (function() {
     comparePokemonToType(checkbox);
   }
 
+  /* Compares the type of the selected checkbox value against all pokemon types */
   function comparePokemonToType(checkbox) {
     pokemonList.forEach(item => {
       item.types.forEach(type => {
         if (type.type.name === checkbox.prop('value')) {
+          selectedPokemon.push(item);
           addListItem(item);
         }
       });
@@ -419,16 +405,18 @@ let pokemonRepository = (function() {
     });
     btnImg.addClass('list-btn__icon');
     if(pokemon.types.length < 2) {
-      btnImg.css('background-color', colorTypes[pokemon.types[0].type.name]);
+      btnImg.css('background-color', typeColors[pokemon.types[0].type.name]);
     }
     else {
-      btnImg.css('background', 'linear-gradient(30deg, ' + colorTypes[pokemon.types[0].type.name] + ' 50%, '
-       + colorTypes[pokemon.types[1].type.name] + ' 50%)');
+      btnImg.css('background', 'linear-gradient(30deg, ' + typeColors[pokemon.types[0].type.name] + ' 50%, '
+       + typeColors[pokemon.types[1].type.name] + ' 50%)');
     }
 
     btn.append(btnImg);
 
-    btn.html(btn.html() + '<br>' + capitalizeWord(pokemon.name));
+    btn.html(btn.html() + '<br>' + pokemon.name);
+
+    btn.css('text-transform', 'capitalize');
 
     li.append(btn);
     div.append(li);
@@ -451,28 +439,28 @@ let pokemonRepository = (function() {
           weight: json.weight,
           types: json.types
         };
-        if(pokemon.id <= 151) {
+        if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(1)) {
           pokemon.generation = 1;
         }
-        else if(pokemon.id <= 251) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(2)) {
           pokemon.generation = 2;
         }
-        else if(pokemon.id <= 386) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(3)) {
           pokemon.generation = 3;
         }
-        else if(pokemon.id <= 493) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(4)) {
           pokemon.generation = 4;
         }
-        else if(pokemon.id <= 649) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(5)) {
           pokemon.generation = 5;
         }
-        else if(pokemon.id <= 721) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(6)) {
           pokemon.generation = 6;
         }
-        else if(pokemon.id <= 809) {
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(7)) {
           pokemon.generation = 7;
         }
-        else if(pokemon.id <= 898){
+        else if(pokemon.id <= pokemonGeneration.getTotalAtGeneration(8)){
           pokemon.generation = 8;
         }
         else {
@@ -525,10 +513,15 @@ let pokemonRepository = (function() {
         fillText.text('Loading ' + resource.name + '...');
       }
     }
-    let loadingDiv = $('<div class="spinner-border text-yellow" role="status"><span class="sr-only">Loading...</span>');
+    let loadingDiv = $('.spinner-border');
+    if(loadingDiv.length === 0) {
+      loadingDiv = $('<div class="spinner-border text-yellow" role="status"><span class="sr-only">Loading...</span>');
+      $('.pokedex__footer').empty();
+      $('.pokedex__footer').append(loadingDiv);
+    }
     target.empty();
     target.append(fillText);
-    target.append(loadingDiv);
+
   }
 
   /* Resets the loading text to display 'Pokedex'. */
@@ -538,6 +531,7 @@ let pokemonRepository = (function() {
     fillText.text('Pokedex');
     target.empty();
     target.append(fillText);
+    $('.pokedex__footer').empty();
   }
 
   /* Creates the pokebox and displays the selected pokemon inside of it. */
@@ -552,15 +546,17 @@ let pokemonRepository = (function() {
     leftbox.addClass('pokebox pokebox__left');
 
     let pokeTitle = $('<h1>');
-    pokeTitle.text(capitalizeWord(pokemon.name));
+    pokeTitle.text(pokemon.name);
+    pokeTitle.css('text-transform', 'capitalize');
 
     let types = [];
 
     pokemon.types.forEach(type => {
       let pokeType = $('<span>');
-      pokeType.css('background-color', colorTypes[type.type.name]);
+      pokeType.css('background-color', typeColors[type.type.name]);
       pokeType.addClass('type-style');
-      pokeType.text(capitalizeWord(type.type.name));
+      pokeType.text(type.type.name);
+      pokeType.css('text-transform', 'capitalize');
       types.push(pokeType);
     });
 
@@ -611,13 +607,21 @@ let pokemonRepository = (function() {
     $('#pokemon-container').modal();
   }
 
+  $(window).scroll(function() {
+    if($(window).scrollTop() + $(window).height() == $(document).height() && !populating) {
+      if(pokemonList.length < pokemonGeneration.getTotalAtGeneration(8)) {
+        populateList();
+      }
+    }
+ });
+
   return {
     add: add,
     addListItem: addListItem,
     getAll: getAll,
     loadList: loadList,
-    targetUrl: targetUrl,
-    createDocument: createDocument
+    createDocument: createDocument,
+    pokemonGeneration: pokemonGeneration
   };
 })(); // This calls the function immediately, instead of having to call it later.
 

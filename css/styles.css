@@ -128,13 +128,19 @@ body {
 }
 
 .type-style {
-  border-style: solid none;
+  border-style: solid;
+  border-color: black;
   border-width: 1px;
   border-radius: 5px;
   padding: 0.15em;
-  font-size: 9pt;
-  color: black;
   margin: 2px;
+  font-size: 9pt;
+  color: white;
+  text-shadow:
+  -1px -1px 0 #000,
+  1px -1px 0 #000,
+  -1px 1px 0 #000,
+  1px 1px 0 #000;
 }
 
 .generation-badge {
@@ -142,6 +148,7 @@ body {
   border-color: black;
   border-width: 1px;
   border-radius: 5px;
+  padding: 0.1em;
   font-size: 9pt;
   color: white;
   text-shadow:
@@ -162,7 +169,7 @@ body {
   margin-bottom: 10px;
   height: auto;
   width: 80%;
-  min-width: 3px;
+  max-width: 1134px;
 }
 
 .pokedex-text {
@@ -171,6 +178,10 @@ body {
 }
 
 .pokedex-box {
+  text-align: center;
+}
+
+.pokedex__footer {
   text-align: center;
 }
 
