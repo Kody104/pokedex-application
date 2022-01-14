@@ -2,6 +2,27 @@
     let pokemonList = [];
     let populating = false;
 
+    var isMobile= {
+      Android: function() {
+        return navigator.userAgent.match(/Android/i);
+      },
+      BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+      },
+      iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+      },
+      Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+      },
+      Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+      },
+      any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+      }
+    };
+
     const typeColors = {
       'normal': '#A8A878',
       'fighting': '#C03028',
@@ -45,9 +66,16 @@
         return generationCount[gen-1];
       }
 
+      function getTotalPokemon() {
+        let total = 0;
+        generationCount.forEach(gen => {total += gen});
+        return total;
+      }
+
       return {
         getTotalAtGeneration: getTotalAtGeneration,
-        getGenerationCount: getGenerationCount
+        getGenerationCount: getGenerationCount,
+        getTotalPokemon: getTotalPokemon
       }
 
     })();
@@ -141,6 +169,21 @@
 
       createSearchBox();
 
+      if(isMobile.any()) {
+        // Create next button if there is something to create it for
+        if (pokemonList.length < pokemonGeneration.getTotalPokemon()) {
+          let nextBtn = $('<button>');
+          nextBtn.addClass('formatted formatted__secondary btn');
+          nextBtn.text('Next');
+
+          nextBtn.on('click', () => {
+            populateList();
+          });
+
+          pokedexBox.append(nextBtn);
+        }
+      }
+
       // Remove old button if it exists
       let oldBtn = $('.formatted');
       if (oldBtn.get(0)) {
@@ -155,7 +198,9 @@
       // Load the list of pokemon from the api
       let promiseArray = [];
       populating = true;
-      if(pokemonList.length + 150 <= 899) {
+      let pokedexBox = $('.pokedex-box');
+
+      if(pokemonList.length + 150 <= pokemonGeneration.getTotalPokemon()) {
         for(let i = 1; i < 151; i++) {
           let promise = new Promise(function(resolve) {
             loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
@@ -170,7 +215,7 @@
         }
       }
       else {
-        let difference = 899 - pokemonList.length;
+        let difference = pokemonGeneration.getTotalPokemon() - pokemonList.length;
         for(let i = 0; i < difference; i++) {
           let promise = new Promise(function(resolve) {
             loadList('https://pokeapi.co/api/v2/pokemon/' + (pokemonList.length + i) + '/').then( (pokemon) => {
@@ -195,8 +240,24 @@
       }).then( () => {
         createSearchBox();
 
+        if(isMobile.any()) {
+          // Create next button if there is something to create it for
+          if (pokemonList.length < pokemonGeneration.getTotalPokemon()) {
+            let nextBtn = $('<button>');
+            nextBtn.addClass('formatted formatted__secondary btn');
+            nextBtn.text('Next');
+
+            nextBtn.on('click', () => {
+              populateList();
+            });
+
+            pokedexBox.append(nextBtn);
+          }
+        }
+
         populating = false;
       });
+
       // Remove old button if it exists
       let oldBtn = $('.formatted');
       if (oldBtn.get(0)) {
@@ -607,12 +668,12 @@
     }
 
     $(window).scroll(function() {
-      if($(window).scrollTop() + $(window).innerHeight() == $(document).height() && !populating) {
-        if(pokemonList.length < pokemonGeneration.getTotalAtGeneration(8)) {
+      if($(window).scrollTop() + $(window).innerHeight() == $(document).height() && !populating && !isMobile.any()) {
+        if(pokemonList.length < pokemonGeneration.getTotalPokemon()) {
           populateList();
         }
       }
-  });
+    });
 
     return {
       add: add,
